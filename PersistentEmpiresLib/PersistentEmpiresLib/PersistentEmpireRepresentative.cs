@@ -2,16 +2,12 @@
 using PersistentEmpiresLib.Factions;
 using PersistentEmpiresLib.NetworkMessages.Server;
 using PersistentEmpiresLib.SceneScripts;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TaleWorlds.Core;
 using TaleWorlds.Engine;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
-using static System.Collections.Specialized.BitVector32;
 
 namespace PersistentEmpiresLib
 {
@@ -19,9 +15,11 @@ namespace PersistentEmpiresLib
     // Player
     public class PersistentEmpireRepresentative : MissionRepresentativeBase
     {
+        public const string defaultClass = "pe_peasant";
+
         private Faction _playerFaction;
         private int _factionIndex = -1;
-        private string _classId = "pe_peasant";
+        private string _classId = defaultClass;
         private Inventory playerInventory;
         private int hunger = 0;
         private PE_SpawnFrame nextSpawnFrame = null;

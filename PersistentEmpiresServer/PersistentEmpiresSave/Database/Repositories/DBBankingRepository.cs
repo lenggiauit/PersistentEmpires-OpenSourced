@@ -1,12 +1,8 @@
 ﻿using Dapper;
 using PersistentEmpiresLib.Database.DBEntities;
 using PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors;
-using PersistentEmpiresLib.SceneScripts;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TaleWorlds.MountAndBlade;
 
 namespace PersistentEmpiresSave.Database.Repositories
@@ -15,7 +11,8 @@ namespace PersistentEmpiresSave.Database.Repositories
     {
         public static int Tax_Rate { get; set; }
 
-        public class DBBank { 
+        public class DBBank
+        {
             public int Id { get; set; }
             public string PlayerId { get; set; }
             public int Amount { get; set; }
@@ -30,7 +27,7 @@ namespace PersistentEmpiresSave.Database.Repositories
         }
         public static int QueryBankBalance(NetworkCommunicator player)
         {
-            IEnumerable<DBPlayer> collection = DBConnection.Connection.Query<DBPlayer>("SELECT * FROM Players WHERE PlayerId = @PlayerId", new
+            IEnumerable<DBPlayer> collection = DBConnection.Connection.Query<DBPlayer>("SELECT BankAmount FROM Players WHERE PlayerId = @PlayerId", new
             {
                 PlayerId = player.VirtualPlayer.Id.ToString()
             });

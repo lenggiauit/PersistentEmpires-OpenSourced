@@ -1,10 +1,4 @@
 ﻿using PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
@@ -26,7 +20,7 @@ namespace PersistentEmpiresLib.PersistentEmpiresGameModels
                 {
                     int tier = (int)equipmentElement.Item.Tier;
                     int requiredEndurance = (tier + 1) * 10;
-                    if(skill >= requiredEndurance)
+                    if (skill >= requiredEndurance)
                     {
                         effectiveWeight += equipmentElement.GetEquipmentElementWeight();
                     }
@@ -52,7 +46,7 @@ namespace PersistentEmpiresLib.PersistentEmpiresGameModels
         public override float GetDismountResistance(Agent agent)
         {
             BasicCharacterObject characterObject = agent.Character;
-            if(characterObject != null)
+            if (characterObject != null)
             {
                 float effectiveSkill = characterObject.GetSkillValue(DefaultSkills.Riding);
                 return 0.0025f * (float)effectiveSkill;
@@ -79,7 +73,7 @@ namespace PersistentEmpiresLib.PersistentEmpiresGameModels
             }
             return num;
         }
-       
+
         private static void InitializeHorseAgentStats(Agent agent, Equipment spawnEquipment, AgentDrivenProperties agentDrivenProperties)
         {
             agentDrivenProperties.AiSpeciesIndex = agent.Monster.FamilyType;
@@ -126,6 +120,13 @@ namespace PersistentEmpiresLib.PersistentEmpiresGameModels
         }
         private AgentDrivenProperties InitializeAgentHumanStats(Agent agent, Equipment spawnEquipment, AgentDrivenProperties agentDrivenProperties, AgentBuildData agentBuildData)
         {
+            var isAgentWounded = WoundingBehavior.Instance.IsAgentWounded(agent);
+            if (isAgentWounded)
+            {
+                ApplyWoundedAgentProperties(agent, agentDrivenProperties);
+
+                return agentDrivenProperties;
+            }
             // Bloklama yarrak gibi olursa buraya bak
             // agentDrivenProperties.SetStat(DrivenProperty.UseRealisticBlocking, MultiplayerOptions.OptionType.UseRealisticBlocking.GetBoolValue(MultiplayerOptions.MultiplayerOptionsAccessMode.CurrentMapOptions) ? 1f : 0f);
             MultiplayerClassDivisions.MPHeroClass heroClass = MultiplayerClassDivisions.GetMPHeroClassForCharacter(agent.Character);
@@ -218,14 +219,17 @@ namespace PersistentEmpiresLib.PersistentEmpiresGameModels
             }
             return 0;
         }
-        private int GetMinSkillForWeapon(ItemObject item) {
+        private int GetMinSkillForWeapon(ItemObject item)
+        {
             return this.GetMinSkillForTier(item.Tier);
         }
-        private float GetBaseSpeedMultiplier() {
+        private float GetBaseSpeedMultiplier()
+        {
 
             return 0.5f;
         }
-        private bool IsAgentWearingAboveItsSkill(Agent agent) {
+        private bool IsAgentWearingAboveItsSkill(Agent agent)
+        {
             float num4 = agent.Character.GetSkillValue(PersistentEmpireSkills.Endurance) > 0 ? agent.Character.GetSkillValue(PersistentEmpireSkills.Endurance) : 10;
 
             for (EquipmentIndex equipmentIndex = agent.IsHuman ? EquipmentIndex.NumAllWeaponSlots : EquipmentIndex.HorseHarness; equipmentIndex < (agent.IsHuman ? EquipmentIndex.ArmorItemEndSlot : EquipmentIndex.NumEquipmentSetSlots); equipmentIndex++)
@@ -260,37 +264,7 @@ namespace PersistentEmpiresLib.PersistentEmpiresGameModels
             // 0 Set Wounded flags
             if (isAgentWounded)
             {
-                agentDrivenProperties.TopSpeedReachDuration = 0.1f;
-                agentDrivenProperties.MaxSpeedMultiplier = 0.2f; // 0.01f
-                agentDrivenProperties.MissileSpeedMultiplier = 0.1f;
-                agentDrivenProperties.SwingSpeedMultiplier = 0.2f;
-
-                agentDrivenProperties.ArmorHead = agent.SpawnEquipment.GetHeadArmorSum();
-                agentDrivenProperties.ArmorTorso = agent.SpawnEquipment.GetHumanBodyArmorSum();
-                agentDrivenProperties.ArmorLegs = agent.SpawnEquipment.GetLegArmorSum();
-                agentDrivenProperties.ArmorArms = agent.SpawnEquipment.GetArmArmorSum();
-
-                agentDrivenProperties.ThrustOrRangedReadySpeedMultiplier = 0.1f; ;
-                agentDrivenProperties.HandlingMultiplier = 0.1f;
-                agentDrivenProperties.ShieldBashStunDurationMultiplier = 0.1f;
-                agentDrivenProperties.KickStunDurationMultiplier = 0.1f;
-                agentDrivenProperties.ReloadSpeed = 0.1f;
-                agentDrivenProperties.MissileSpeedMultiplier = 0.5f;
-                agentDrivenProperties.ReloadMovementPenaltyFactor = 0.1f;
-
-                agentDrivenProperties.WeaponMaxMovementAccuracyPenalty = 0.1f;
-                agentDrivenProperties.WeaponMaxUnsteadyAccuracyPenalty = 0.1f;
-
-                agentDrivenProperties.WeaponInaccuracy = 10f;
-                agentDrivenProperties.WeaponBestAccuracyWaitTime = 0.1f;
-                agentDrivenProperties.WeaponUnsteadyBeginTime = 0f;
-                agentDrivenProperties.WeaponUnsteadyEndTime = 1f;
-                agentDrivenProperties.WeaponRotationalAccuracyPenaltyInRadians = 2f;
-
-                agentDrivenProperties.AttributeRiding = 0.5f;
-                agentDrivenProperties.AttributeHorseArchery = 0.1f;
-                agentDrivenProperties.BipedalRangedReadySpeedMultiplier = 0.01f;
-                agentDrivenProperties.BipedalRangedReloadSpeedMultiplier = 0.01f;
+                ApplyWoundedAgentProperties(agent, agentDrivenProperties);
 
                 base.SetAiRelatedProperties(agent, agentDrivenProperties, mainWeaponWeaponComponentData, offHandWieldedWeaponComponentData);
                 return;
@@ -360,7 +334,7 @@ namespace PersistentEmpiresLib.PersistentEmpiresGameModels
 
             // 7. Calculate maxSpeedMultiplier
             var athleticsSkill = character.GetSkillValue(DefaultSkills.Athletics) > 0 ? character.GetSkillValue(DefaultSkills.Athletics) : 80;
-            var b = 100 + (weaponsTotalWeight/2) + (this.GetEffectiveArmorEncumbrance(agent) / 3);
+            var b = 100 + (weaponsTotalWeight / 2) + (this.GetEffectiveArmorEncumbrance(agent) / 3);
             var maxSpeedMultiplier = ((2 * athleticsSkill) - b) / 100;
             if (this.IsAgentWearingAboveItsSkill(agent)) maxSpeedMultiplier = 0.01f;
             else if (maxSpeedMultiplier < 0.7f && !this.IsAgentWearingAboveItsSkill(agent)) maxSpeedMultiplier = 0.7f;
@@ -378,7 +352,7 @@ namespace PersistentEmpiresLib.PersistentEmpiresGameModels
             if (mainWeaponWeaponComponentData != null)
             {
                 var effectiveSkillForWeapon = this.GetEffectiveSkillForWeapon(agent, (WeaponComponentData)mainWeaponWeaponComponentData);
-                
+
                 if (perkHandler != null)
                 {
                     agentDrivenProperties.MissileSpeedMultiplier *= perkHandler.GetThrowingWeaponSpeed(mainWeaponWeaponComponentData) + 1f;
@@ -463,7 +437,7 @@ namespace PersistentEmpiresLib.PersistentEmpiresGameModels
 
             // 9. Handle AttributeShieldMissileCollisionBodySizeAdder
             agentDrivenProperties.AttributeShieldMissileCollisionBodySizeAdder = 0.3f;
-            
+
             // 10. Handle horse
             var mountAgent = agent.MountAgent;
             float num10 = (mountAgent != null) ? mountAgent.GetAgentDrivenPropertyValue(DrivenProperty.AttributeRiding) : 1f;
@@ -486,6 +460,42 @@ namespace PersistentEmpiresLib.PersistentEmpiresGameModels
             }
             base.SetAiRelatedProperties(agent, agentDrivenProperties, mainWeaponWeaponComponentData, offHandWieldedWeaponComponentData);
         }
+
+        private static void ApplyWoundedAgentProperties(Agent agent, AgentDrivenProperties agentDrivenProperties)
+        {
+            agentDrivenProperties.TopSpeedReachDuration = 0.1f;
+            agentDrivenProperties.MaxSpeedMultiplier = 0.2f; // 0.01f
+            agentDrivenProperties.MissileSpeedMultiplier = 0.1f;
+            agentDrivenProperties.SwingSpeedMultiplier = 0.2f;
+
+            agentDrivenProperties.ArmorHead = agent.SpawnEquipment.GetHeadArmorSum();
+            agentDrivenProperties.ArmorTorso = agent.SpawnEquipment.GetHumanBodyArmorSum();
+            agentDrivenProperties.ArmorLegs = agent.SpawnEquipment.GetLegArmorSum();
+            agentDrivenProperties.ArmorArms = agent.SpawnEquipment.GetArmArmorSum();
+
+            agentDrivenProperties.ThrustOrRangedReadySpeedMultiplier = 0.1f; ;
+            agentDrivenProperties.HandlingMultiplier = 0.1f;
+            agentDrivenProperties.ShieldBashStunDurationMultiplier = 0.1f;
+            agentDrivenProperties.KickStunDurationMultiplier = 0.1f;
+            agentDrivenProperties.ReloadSpeed = 0.1f;
+            agentDrivenProperties.MissileSpeedMultiplier = 0.5f;
+            agentDrivenProperties.ReloadMovementPenaltyFactor = 0.1f;
+
+            agentDrivenProperties.WeaponMaxMovementAccuracyPenalty = 0.1f;
+            agentDrivenProperties.WeaponMaxUnsteadyAccuracyPenalty = 0.1f;
+
+            agentDrivenProperties.WeaponInaccuracy = 10f;
+            agentDrivenProperties.WeaponBestAccuracyWaitTime = 0.1f;
+            agentDrivenProperties.WeaponUnsteadyBeginTime = 0f;
+            agentDrivenProperties.WeaponUnsteadyEndTime = 1f;
+            agentDrivenProperties.WeaponRotationalAccuracyPenaltyInRadians = 2f;
+
+            agentDrivenProperties.AttributeRiding = 0.5f;
+            agentDrivenProperties.AttributeHorseArchery = 0.1f;
+            agentDrivenProperties.BipedalRangedReadySpeedMultiplier = 0.01f;
+            agentDrivenProperties.BipedalRangedReloadSpeedMultiplier = 0.01f;
+        }
+
         private int GetSkillValueForItem(BasicCharacterObject characterObject, ItemObject primaryItem)
         {
             return characterObject.GetSkillValue((primaryItem != null) ? primaryItem.RelevantSkill : DefaultSkills.Athletics);

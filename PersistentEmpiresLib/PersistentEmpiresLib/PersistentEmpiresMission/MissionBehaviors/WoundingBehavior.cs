@@ -1,12 +1,10 @@
 ﻿using PersistentEmpiresLib.NetworkMessages.Server;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
+using System.Linq;
+using System;
 
 namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
 {
@@ -73,12 +71,12 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
         public override void OnPlayerConnectedToServer(NetworkCommunicator networkPeer)
         {
             base.OnPlayerConnectedToServer(networkPeer);
-            
+
             if (WoundingEnabled == false) return;
 
-            foreach(NetworkCommunicator player in  IsWounded.Keys.ToList())
+            foreach (NetworkCommunicator player in IsWounded.Keys.ToList())
             {
-                if(IsWounded.ContainsKey(player) && IsWounded[player])
+                if (IsWounded.ContainsKey(player) && IsWounded[player])
                 {
                     GameNetwork.BeginModuleEventAsServer(networkPeer);
                     GameNetwork.WriteMessage(new UpdateWoundedPlayer(player, true));
@@ -106,19 +104,19 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
 
             if (!WoundingEnabled) return;
 
-            foreach(NetworkCommunicator player in WoundedUntil.Keys.ToList())
+            foreach (NetworkCommunicator player in WoundedUntil.Keys.ToList())
             {
                 if (!WoundedUntil.ContainsKey(player)) continue;
 
-                if(WoundedUntil[player] < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
+                if (WoundedUntil[player] < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
                 {
                     HealPlayer(player);
                 }
                 else
                 {
-                    if(player.ControlledAgent != null)
+                    if (player.ControlledAgent != null)
                     {
-                        if(!ItemsWhichCanBeUsedByWounded.Contains(player.ControlledAgent.WieldedWeapon.Item?.StringId))
+                        if (!ItemsWhichCanBeUsedByWounded.Contains(player.ControlledAgent.WieldedWeapon.Item?.StringId))
                         {
                             player.ControlledAgent?.TryToSheathWeaponInHand(Agent.HandIndex.MainHand, Agent.WeaponWieldActionType.Instant);
                         }
@@ -166,10 +164,10 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
 
                 //if your wounded AND your not healed yet then keep old timer
                 if (WoundedUntil.ContainsKey(player) && WoundedUntil[player] < DateTimeOffset.UtcNow.ToUnixTimeSeconds()) return;
-                
+
                 // otherwise get new heal time
                 WoundedUntil[player] = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + (WoundingTime * 60);
-                
+
                 IsWounded[player] = true;
                 GameNetwork.BeginBroadcastModuleEvent();
                 GameNetwork.WriteMessage(new UpdateWoundedPlayer(player, true));

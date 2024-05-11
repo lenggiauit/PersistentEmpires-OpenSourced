@@ -2,13 +2,9 @@
 using PersistentEmpiresLib;
 using PersistentEmpiresLib.Database.DBEntities;
 using PersistentEmpiresLib.Helpers;
-using PersistentEmpiresLib.PersistentEmpiresMission;
 using PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
@@ -28,7 +24,7 @@ namespace PersistentEmpiresSave.Database.Repositories
 
         private static bool OnPlayerUpdateCustomName(NetworkCommunicator peer, string customName)
         {
-            string fetchFirst = "SELECT * FROM Players WHERE LOWER(CustomName) = @customName OR LOWER(Name) = @customName";
+            string fetchFirst = "SELECT CustomName FROM Players WHERE LOWER(CustomName) = @customName OR LOWER(Name) = @customName";
             IEnumerable<DBPlayer> players = DBConnection.Connection.Query<DBPlayer>(fetchFirst, new
             {
                 CustomName = customName.ToLower()
@@ -41,14 +37,15 @@ namespace PersistentEmpiresSave.Database.Repositories
                 CustomName = customName,
                 PlayerId = peer.VirtualPlayer.Id.ToString()
             });
-            IEnumerable<DBPlayerName> playerNames = DBConnection.Connection.Query<DBPlayerName>("SELECT * FROM PlayerNames WHERE PlayerName = @PlayerName", new
+            IEnumerable<DBPlayerName> playerNames = DBConnection.Connection.Query<DBPlayerName>("SELECT PlayerName FROM PlayerNames WHERE PlayerName = @PlayerName", new
             {
                 PlayerName = customName
             });
             if (playerNames.Count() == 0)
             {
                 string insertSql = "INSERT INTO PlayerNames (PlayerName, PlayerId) VALUES (@PlayerName, @PlayerId)";
-                DBConnection.Connection.Execute(insertSql, new DBPlayerName() { 
+                DBConnection.Connection.Execute(insertSql, new DBPlayerName()
+                {
                     PlayerId = peer.VirtualPlayer.Id.ToString(),
                     PlayerName = customName
                 });
@@ -69,7 +66,8 @@ namespace PersistentEmpiresSave.Database.Repositories
             DBPlayer dbplayer = GetOrCreatePlayer(player, out created);
 
             string updateQuery = "UPDATE Players SET DiscordId = @DiscordId WHERE PlayerId = @PlayerId";
-            DBConnection.Connection.Execute(updateQuery, new { 
+            DBConnection.Connection.Execute(updateQuery, new
+            {
                 DiscordId = id,
                 PlayerId = dbplayer.PlayerId
             });
@@ -241,7 +239,7 @@ namespace PersistentEmpiresSave.Database.Repositories
 
             return player;
         }
-    
+
         public static void OnUpdateCustomName(NetworkCommunicator player, string customName)
         {
             string updateQuery = "UPDATE Players SET CustomName = @CustomName WHERE PlayerId = @PlayerId";
