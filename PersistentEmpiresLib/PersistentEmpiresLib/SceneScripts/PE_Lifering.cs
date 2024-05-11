@@ -95,7 +95,7 @@ namespace PersistentEmpiresLib.SceneScripts
             Vec3 entityOrigin = this.GameEntity.GetGlobalFrame().origin;
             Mission.Current.Scene.GetAllEntitiesWithScriptComponent<PE_BlocShip>(ref listEntity);
             List<GameEntity> listEntity2 = new List<GameEntity>();
-            Mission.Current.Scene.GetAllEntitiesWithScriptComponent<PE_ShipCanon>(ref listEntity2);
+            Mission.Current.Scene.GetAllEntitiesWithScriptComponent<PE_ShipCannon>(ref listEntity2);
             listEntity.AddRange(listEntity2);
 
             listEntity = listEntity.Where(e => entityOrigin.Distance(e.GetGlobalFrame().origin) <= 20 && e != this.GameEntity).ToList();
@@ -114,7 +114,7 @@ namespace PersistentEmpiresLib.SceneScripts
 
                         List<Vec3> entityCheckPointList = GetCollisionCheckPoints(entity);
 
-                        if (Helpers.Utilities.HasClosestToDistanceAsVec2(currentEntityCheckPointList, entityCheckPointList, defaultShipCollisionDistance))
+                        if (Helpers.Utilities.HasClosestToDistanceAsVec3(currentEntityCheckPointList, entityCheckPointList, defaultShipCollisionDistance))
                         {
                             if (this.IsMovingBackward)
                             {

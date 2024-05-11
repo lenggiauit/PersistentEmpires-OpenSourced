@@ -1,4 +1,5 @@
-﻿using PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors;
+﻿using PersistentEmpiresLib.Helpers;
+using PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors;
 using TaleWorlds.Core;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
@@ -7,6 +8,7 @@ namespace PersistentEmpiresLib.PersistentEmpiresGameModels
 {
     public class PEAgentStatCalculateModel : AgentStatCalculateModel
     {
+         
         public float GetEffectiveArmorEncumbrance(Agent agent)
         {
             // float num4 = agent.Character.GetSkillValue(DefaultSkills.Athletics) > 0 ? agent.Character.GetSkillValue(DefaultSkills.Athletics) : 10;
@@ -114,9 +116,9 @@ namespace PersistentEmpiresLib.PersistentEmpiresGameModels
             MultiplayerClassDivisions.MPHeroClass mpheroClassForCharacter = MultiplayerClassDivisions.GetMPHeroClassForCharacter(agent.Character);
             if (mpheroClassForCharacter != null)
             {
-                return (float)mpheroClassForCharacter.Health;
+                return (float)mpheroClassForCharacter.Health + AgentHelpers.GetConfigCharacterAdjustHealth();
             }
-            return 100f;
+            return 100f + AgentHelpers.GetConfigCharacterAdjustHealth();
         }
         private AgentDrivenProperties InitializeAgentHumanStats(Agent agent, Equipment spawnEquipment, AgentDrivenProperties agentDrivenProperties, AgentBuildData agentBuildData)
         {

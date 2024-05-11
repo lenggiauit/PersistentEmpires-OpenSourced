@@ -16,7 +16,7 @@ using TaleWorlds.Library;
  
 namespace PersistentEmpires.Views.Views
 {
-    public class PEShipCanonViewController : MissionView
+    public class PEShipCannonViewController : MissionView
     {
 
 
@@ -31,7 +31,7 @@ namespace PersistentEmpires.Views.Views
             if (userAgent.IsMainAgent && usedObject is StandingPoint)
             {
                 UsableMachine usableMachineFromPoint = this.GetUsableMachineFromPoint(usedObject as StandingPoint);
-                if (usableMachineFromPoint is PE_ShipCanon)
+                if (usableMachineFromPoint is PE_ShipCannon)
                 {
                     RangedSiegeWeapon rangedSiegeWeapon = usableMachineFromPoint as RangedSiegeWeapon;
                     if (rangedSiegeWeapon.GetComponent<RangedSiegeWeaponView>() == null)
@@ -46,13 +46,13 @@ namespace PersistentEmpires.Views.Views
         private UsableMachine GetUsableMachineFromPoint(StandingPoint standingPoint)
         {
             GameEntity gameEntity = standingPoint.GameEntity;
-            while (gameEntity != null && !gameEntity.HasScriptOfType<PE_ShipCanon>())
+            while (gameEntity != null && !gameEntity.HasScriptOfType<PE_ShipCannon>())
             {
                 gameEntity = gameEntity.Parent;
             }
             if (gameEntity != null)
             {
-                UsableMachine firstScriptOfType = gameEntity.GetFirstScriptOfType<PE_ShipCanon>();
+                UsableMachine firstScriptOfType = gameEntity.GetFirstScriptOfType<PE_ShipCannon>();
                 if (firstScriptOfType != null)
                 {
                     return firstScriptOfType;
@@ -70,7 +70,7 @@ namespace PersistentEmpires.Views.Views
 				rangedSiegeWeaponView = new TrebuchetView();
 			}
 			else*/
-            if (rangedSiegeWeapon is PE_ShipCanon)
+            if (rangedSiegeWeapon is PE_ShipCannon)
             {
                 rangedSiegeWeaponView = new PE_MangonelView();
             }

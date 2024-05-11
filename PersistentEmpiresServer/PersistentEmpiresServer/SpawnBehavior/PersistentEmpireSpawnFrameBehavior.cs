@@ -173,7 +173,7 @@ namespace PersistentEmpiresServer.SpawnBehavior
                         }
                         else
                         {
-                            agent.Health = 100;
+                            agent.Health = 200;
                         }
                         Action<MissionPeer> onPeerSpawnedFromVisuals = this.OnPeerSpawnedFromVisuals;
                         if (persistentEmpireRepresentative.LoadFromDb) persistentEmpireRepresentative.LoadFromDb = false;

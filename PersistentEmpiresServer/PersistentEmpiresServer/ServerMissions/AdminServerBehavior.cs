@@ -4,6 +4,7 @@ using PersistentEmpiresLib.Helpers;
 using PersistentEmpiresLib.NetworkMessages.Client;
 using PersistentEmpiresLib.NetworkMessages.Server;
 using PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors;
+using PersistentEmpiresMission.MissionBehaviors;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -258,8 +259,8 @@ namespace PersistentEmpiresServer.ServerMissions
             {
                 BasicCharacterObject bco = MBObjectManager.Instance.GetObject<BasicCharacterObject>(persistentEmpireRepresentative.GetClassId());
                 AgentHelpers.RespawnAgentOnPlaceForFaction(player.ControlledAgent, persistentEmpireRepresentative.GetFaction(), null, bco);
-                player.ControlledAgent.BaseHealthLimit = 200;
-                player.ControlledAgent.Health = 200;
+                player.ControlledAgent.BaseHealthLimit = 200 + +AgentHelpers.GetConfigCharacterAdjustHealth();
+                player.ControlledAgent.Health = 200 + AgentHelpers.GetConfigCharacterAdjustHealth();
                 LoggerHelper.LogAnAction(player, LogAction.PlayerClassChange, null, new object[] {
                     bco
                 });

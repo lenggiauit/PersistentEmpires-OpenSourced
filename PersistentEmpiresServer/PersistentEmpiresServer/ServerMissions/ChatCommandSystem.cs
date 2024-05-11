@@ -2,6 +2,7 @@
 using PersistentEmpiresHarmony.Patches;
 using PersistentEmpiresLib;
 using PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors;
+using PersistentEmpiresMission.MissionBehaviors;
 using PersistentEmpiresServer.ChatCommands.Commands;
 using System;
 using System.Collections.Generic;

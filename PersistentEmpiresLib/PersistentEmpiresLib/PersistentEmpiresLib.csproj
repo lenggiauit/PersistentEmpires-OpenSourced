@@ -133,6 +133,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Helpers\CountDownTimer.cs" />
+    <Compile Include="Helpers\Utilities.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="ConfigManage.cs" />
     <Compile Include="Database\DBEntities\DBBanRecord.cs" />
@@ -193,8 +194,10 @@
     <Compile Include="NetworkMessages\Client\RequestSellItem.cs" />
     <Compile Include="NetworkMessages\Client\RequestStartEat.cs" />
     <Compile Include="NetworkMessages\Client\RequestStartPlaying.cs" />
+    <Compile Include="NetworkMessages\Client\RequestStartUsingDragonVItem.cs" />
     <Compile Include="NetworkMessages\Client\RequestStopEat.cs" />
     <Compile Include="NetworkMessages\Client\RequestStopPlaying.cs" />
+    <Compile Include="NetworkMessages\Client\RequestStopUsingDragonVItem.cs" />
     <Compile Include="NetworkMessages\Client\RequestSuicide.cs" />
     <Compile Include="NetworkMessages\Client\RequestTradingBuyItem.cs" />
     <Compile Include="NetworkMessages\Client\RequestTradingPrices.cs" />
@@ -225,6 +228,7 @@
     <Compile Include="NetworkMessages\Server\AdminOrErrorMessage.cs" />
     <Compile Include="NetworkMessages\Server\AgentLabelConfig.cs" />
     <Compile Include="NetworkMessages\Server\AgentPlayingInstrument.cs" />
+    <Compile Include="NetworkMessages\Server\AgentUsingDragonVItem.cs" />
     <Compile Include="NetworkMessages\Server\Announcement.cs" />
     <Compile Include="NetworkMessages\Server\AuthorizeAsAdmin.cs" />
     <Compile Include="NetworkMessages\Server\BehadeAgentPacket.cs" />
@@ -320,6 +324,7 @@
     <Compile Include="PersistentEmpiresMission\MissionBehaviors\DecapitationBehavior.cs" />
     <Compile Include="PersistentEmpiresMission\MissionBehaviors\DiscordRoleRegistryBehavior.cs" />
     <Compile Include="PersistentEmpiresMission\MissionBehaviors\DoctorBehavior.cs" />
+    <Compile Include="PersistentEmpiresMission\MissionBehaviors\DragonVItemBehavior.cs" />
     <Compile Include="PersistentEmpiresMission\MissionBehaviors\DrowningBehavior.cs" />
     <Compile Include="PersistentEmpiresMission\MissionBehaviors\FactionPollComponent.cs" />
     <Compile Include="PersistentEmpiresMission\MissionBehaviors\FactionsBehavior.cs" />
@@ -384,9 +389,11 @@
     <Compile Include="SceneScripts\PE_DestructableComponent.cs" />
     <Compile Include="SceneScripts\PE_ItemConverter.cs" />
     <Compile Include="SceneScripts\PE_LadderBuilder.cs" />
+    <Compile Include="SceneScripts\PE_Lifering.cs" />
     <Compile Include="SceneScripts\PE_Mangonel.cs" />
     <Compile Include="SceneScripts\PE_MoneyChest.cs" />
     <Compile Include="SceneScripts\PE_NativeGate.cs" />
+    <Compile Include="SceneScripts\PE_ShipCannon.cs" />
     <Compile Include="SceneScripts\PE_SiegeTower.cs" />
     <Compile Include="SceneScripts\PE_SiegeTowerBuilder.cs" />
     <Compile Include="SceneScripts\PE_StandingPointWithWeaponRequirement.cs" />

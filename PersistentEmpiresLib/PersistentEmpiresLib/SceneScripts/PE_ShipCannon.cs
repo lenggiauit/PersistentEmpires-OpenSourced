@@ -26,11 +26,11 @@ namespace PersistentEmpiresLib.SceneScripts
     public sealed class PE_ShipCanonAI : RangedSiegeWeaponAi
     {
         // Token: 0x06001084 RID: 4228 RVA: 0x00035E83 File Offset: 0x00034083
-        public PE_ShipCanonAI(PE_ShipCanon shipCanon) : base(shipCanon)
+        public PE_ShipCanonAI(PE_ShipCannon shipCanon) : base(shipCanon)
         {
         }
     }
-    public class PE_ShipCanon : RangedSiegeWeapon, ISpawnable, IMoveable, IStray, IRemoveable
+    public class PE_ShipCannon : RangedSiegeWeapon, ISpawnable, IMoveable, IStray, IRemoveable
     {
 
         public float ShipAdvanceSpeed = 3f;
@@ -57,9 +57,6 @@ namespace PersistentEmpiresLib.SceneScripts
         public string ParticleEffectOnDestroy = "psys_game_wooden_merlon_destruction";
         public string SoundEffectOnDestroy = "";
 
-        // public string ParticleEffectOnDestroy = "psys_siege_sturgia_wall_destruction"; 
-        // public string SoundEffectOnDestroy = "event:/mission/siege/generic/stone_destroy";
-         
         public string ParticleEffectOnRepair = "";
         public string SoundEffectOnRepair = "";
         public bool DestroyedByStoneOnly = false;
@@ -72,7 +69,7 @@ namespace PersistentEmpiresLib.SceneScripts
         public bool IsMovingDown { get; set; }
         public float HitPoint;
         public float MaxHitPoint = 200f;
-      
+
 
         private long WillBeDeletedAt = 0;
         private SkillObject RidingSkill;
@@ -82,7 +79,6 @@ namespace PersistentEmpiresLib.SceneScripts
         private bool _landed;
         private bool destroyed = false;
 
-        private float defaultShipDistance = 1.6f;
 
         private float defaultShipCollisionDistance = 0.1f;
         /* horizontal  semiaxis */
@@ -90,20 +86,14 @@ namespace PersistentEmpiresLib.SceneScripts
         /* vertical semiaxis */
         private float defaultAdjustShipVS = 3;
 
-        private const string specialShip1 = "pe_shipdragon";
-        private const string specialShip2 = "pe_shipwithcanon"; 
-        private const string shipwc = "pe_shipwc";
-        private const string mediumShip = "pe_ship1";
-        private const string smallShip = "pe_ship_e";
-
-        protected bool IsShootSideInLeft {  get; set; }  
+        protected bool IsShootSideInLeft { get; set; }
 
         protected float CurrentShootAngle { get; set; }
         protected float CurrentShootLeftRightAngle { get; set; }
         protected float CurrentShootTopLeftAngle { get; set; }
 
         private string CollisionCheckPointTag = "collision_check_point";
-          
+
         private bool isHitting = false;
 
         MatrixFrame canonFrame;
@@ -156,8 +146,8 @@ namespace PersistentEmpiresLib.SceneScripts
             List<Vec3> list = new List<Vec3>();
             foreach (var cp in gameEntity.GetChildren().Where(c => c.HasTag(CollisionCheckPointTag)))
             {
-                list.Add(cp.GetGlobalFrame().origin); 
-            } 
+                list.Add(cp.GetGlobalFrame().origin);
+            }
             return list;
         }
 
@@ -175,8 +165,6 @@ namespace PersistentEmpiresLib.SceneScripts
 
         private void CheckIfLanded(MatrixFrame oldFrame)
         {
-            // if (this._landed) return;
-
             if (base.GameEntity == null) return;
             if (oldFrame == null) return;
             float heightUnder = Mission.Current.Scene.GetTerrainHeight(this.GameEntity.GlobalPosition.AsVec2, true);
@@ -190,148 +178,30 @@ namespace PersistentEmpiresLib.SceneScripts
                 if (this.IsTurningLeft) this.StopTurningLeft();
                 if (this.IsTurningRight) this.StopTurningRight();
                 base.GameEntity.SetFrame(ref oldFrame);
-                // this._landed = true;
                 Mission.Current.MakeSound(SoundEvent.GetEventIdFromString("event:/mission/siege/merlon/wood_destroy"), this.GameEntity.GlobalPosition, false, true, -1, -1);
-
                 this.SetHitPoint(this.HitPoint - 10, new Vec3(0, 0, 0));
                 this.isHitting = true;
-                // this.Disable();
             }
-        }
-
-
-        private float GetDistanceByAngle(Vec3 centerPoint, float hs, float vs, double t_rad)
-        {
-            float x = centerPoint.X + (hs * (float)Math.Cos(t_rad));
-            float y = centerPoint.Y + (vs * (float)Math.Sin(t_rad));
-            float z = centerPoint.z;
-            Vec3 newVecByAngle = new Vec3(x, y, z);
-            return centerPoint.Distance(newVecByAngle);
-        }
-
-
-        private Vec3 GetCollisonPointByAngle(Vec3 centerPoint, float hs, float vs, double t_rad)
-        {
-            float x = centerPoint.X + (hs * (float)Math.Cos(t_rad));
-            float y = centerPoint.Y + (vs * (float)Math.Sin(t_rad));
-            float z = centerPoint.z;
-            return new Vec3(x, y, z);
-        }
-
-        private double GetRadian(GameEntity e1, GameEntity e2)
-        {
-            Vec3 currentEnityVecRotationS = e1.GetGlobalFrame().rotation.s;
-            Vec3 enityVecRotationS = e2.GetGlobalFrame().rotation.s;
-            var dot = Vec3.DotProduct(currentEnityVecRotationS, enityVecRotationS);
-            return Math.Acos(Vec3.DotProduct(currentEnityVecRotationS, enityVecRotationS) / (currentEnityVecRotationS.Length) * enityVecRotationS.Length);
-        }
-
-        private float GetAdjustShipHSVS(GameEntity gameEntity)
-        {
-            float entityLength = gameEntity.GetGlobalScale().Normalize();
-            switch (gameEntity.Name)
-            {
-                case specialShip1:
-                case specialShip2:
-                    {
-                        return 140f;
-                    }
-                case shipwc:
-                    {
-                        return 150f;
-                    }
-                case mediumShip:
-                    {
-                        return 160f;
-                    }
-
-                case smallShip:
-                    {
-                        return 180f;
-                    }
-
-                default:
-                    return defaultAdjustShipHS;
-            }
-        }
-
-
-        private float GetAdjustShipHS(GameEntity gameEntity)
-        {
-            float entityLength = gameEntity.GetGlobalScale().Normalize();
-            switch (gameEntity.Name)
-            {
-                case specialShip1:
-                case specialShip2:
-                    {
-                        return 9f;
-                    }
-                case shipwc:
-                    {
-                        return 6.2f;
-                    }
-                case mediumShip:
-                    {
-                        return 5.0f;
-                    }
-
-                case smallShip:
-                    {
-                        return 2.8f;
-                    }
-
-                default:
-                    return defaultAdjustShipHS;
-            }
-        }
-
-        private float GetAdjustShipVS(GameEntity gameEntity)
-        {
-            switch (gameEntity.Name)
-            {
-                case specialShip1:
-                case specialShip2:
-                    {
-                        return 20f;
-                    }
-                case shipwc:
-                    {
-                        return 16.5f;
-                    }
-                case mediumShip:
-                    {
-                        return 7.8f;
-                    }
-
-                case smallShip:
-                    {
-                        return 5.5f;
-                    }
-
-                default:
-                    return defaultAdjustShipVS;
-            }
-
         }
 
 
         private void UpdateParticle()
         {
-            if(this.GameEntity == null)
+            if (this.GameEntity == null)
                 return;
 
             var tail = this.GameEntity.GetFirstChildEntityWithTag("shiptail_point");
             if (tail != null)
             {
-                if(IsMovingBackward || IsMovingDown || IsMovingUp || IsMovingForward)
-                { 
-                    tail.ResumeParticleSystem(true); 
+                if (IsMovingBackward || IsMovingDown || IsMovingUp || IsMovingForward)
+                {
+                    tail.ResumeParticleSystem(true);
                 }
                 else
                 {
                     tail.PauseParticleSystem(true);
                 }
-            } 
+            }
         }
 
         private void checkHittingObject(MatrixFrame oldFrame)
@@ -344,12 +214,12 @@ namespace PersistentEmpiresLib.SceneScripts
             Vec3 entityOrigin = this.GameEntity.GetGlobalFrame().origin;
             Mission.Current.Scene.GetAllEntitiesWithScriptComponent<PE_BlocShip>(ref listEntity);
             List<GameEntity> listEntity2 = new List<GameEntity>();
-            Mission.Current.Scene.GetAllEntitiesWithScriptComponent<PE_ShipCanon>(ref listEntity2);
+            Mission.Current.Scene.GetAllEntitiesWithScriptComponent<PE_ShipCannon>(ref listEntity2);
             listEntity.AddRange(listEntity2);
 
             listEntity = listEntity.Where(e => entityOrigin.Distance(e.GetGlobalFrame().origin) <= 20 && e != this.GameEntity).ToList();
 
-            List<Vec3> currentEntityCheckPointList = GetCollisionCheckPoints(this.GameEntity);  
+            List<Vec3> currentEntityCheckPointList = GetCollisionCheckPoints(this.GameEntity);
 
             if (listEntity.Count > 0)
             {
@@ -362,8 +232,8 @@ namespace PersistentEmpiresLib.SceneScripts
                     {
 
                         List<Vec3> entityCheckPointList = GetCollisionCheckPoints(entity);
-                          
-                        if(Helpers.Utilities.HasClosestToDistanceAsVec2(currentEntityCheckPointList, entityCheckPointList, defaultShipCollisionDistance))
+
+                        if (Helpers.Utilities.HasClosestToDistanceAsVec3(currentEntityCheckPointList, entityCheckPointList, defaultShipCollisionDistance))
                         {
                             if (this.IsMovingBackward)
                             {
@@ -400,15 +270,13 @@ namespace PersistentEmpiresLib.SceneScripts
                             break;
 
                         }
-                         
+
 
                     }
                 }
 
             }
         }
-
-
 
 
         // Token: 0x170007FE RID: 2046
@@ -484,7 +352,7 @@ namespace PersistentEmpiresLib.SceneScripts
 			}*/
             this.UpdateProjectilePosition();
         }
-         
+
         // Token: 0x06002CC2 RID: 11458 RVA: 0x000AFE90 File Offset: 0x000AE090
         public override SiegeEngineType GetSiegeEngineType()
         {
@@ -492,7 +360,7 @@ namespace PersistentEmpiresLib.SceneScripts
             {
                 return DefaultSiegeEngineTypes.Catapult;
             }
-            return DefaultSiegeEngineTypes.Onager;
+            return DefaultSiegeEngineTypes.FireOnager;
         }
 
         protected override void UpdateAmmoMesh()
@@ -546,7 +414,7 @@ namespace PersistentEmpiresLib.SceneScripts
             // this._verticalAdjusterStartingLocalFrame = this._body.GameEntity.GetBoneEntitialFrameWithIndex(0).TransformToLocal(this._verticalAdjusterStartingLocalFrame);
 
             base.OnInit();
-            this.InitiateMoveSynch(); 
+            this.InitiateMoveSynch();
             this.HitPoint = this.MaxHitPoint;
             this.LoadAmmoStandingPoint.InitRequiredWeaponClasses(this.OriginalMissileItem.PrimaryWeapon.WeaponClass);
             this.LoadAmmoStandingPoint.InitRequiredWeapon(null);
@@ -607,17 +475,17 @@ namespace PersistentEmpiresLib.SceneScripts
                 this.RepairSkill = MBObjectManager.Instance.GetObject<SkillObject>(this.RepairingSkillId);
             }
             this.ParseRepairReceipts();
-             
+
             this.ResetStrayDuration();
             //
             defaultShipCollisionDistance = ConfigManager.GetFloatConfig("ShipCollisionDistance", defaultShipCollisionDistance);
 
             GameEntity canon = this.GameEntity.GetChildren().Where(c => c.Name.Equals("Canon_Tube_Right")).FirstOrDefault();
-            if (canon != null) 
+            if (canon != null)
             {
                 canonFrame = canon.GetGlobalFrame();
-            } 
-        } 
+            }
+        }
         // Token: 0x06002CC4 RID: 11460 RVA: 0x000B0180 File Offset: 0x000AE380
         protected override void OnEditorInit()
         {
@@ -643,7 +511,6 @@ namespace PersistentEmpiresLib.SceneScripts
             }
             return aimStandingPoint.UserAgent;
         }
-
 
 
         // Token: 0x06002CC5 RID: 11461 RVA: 0x000B0182 File Offset: 0x000AE382
@@ -673,7 +540,6 @@ namespace PersistentEmpiresLib.SceneScripts
             this.WillBeDeletedAt = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + this.StrayDurationSeconds;
         }
 
-          
         protected void MoveControl()
         {
 
@@ -763,7 +629,7 @@ namespace PersistentEmpiresLib.SceneScripts
                         ActionIndexCache ac = ActionIndexCache.act_none;
                         this.GetPilotAgent().SetActionChannel(0, ac, true, 0UL, 0.0f, 1f, -0.2f, 0.4f, 0, false, -0.2f, 0, true);
                     }
-                    
+
                 }
                 // UpdateParticle();
             }
@@ -791,9 +657,9 @@ namespace PersistentEmpiresLib.SceneScripts
                 base.OnTick(dt);
 
                 this.MoveControl();
-                
+
                 if (this.GetPilotAgent() != null)
-                { 
+                {
                     NetworkCommunicator player = this.GetPilotAgent().MissionPeer.GetNetworkPeer();
                     PersistentEmpireRepresentative persistentEmpireRepresentative = player.GetComponent<PersistentEmpireRepresentative>();
                     if (CurrentFaction != persistentEmpireRepresentative.GetFaction())
@@ -801,21 +667,20 @@ namespace PersistentEmpiresLib.SceneScripts
                         this.CurrentFaction = persistentEmpireRepresentative.GetFaction();
                         UpdateBannerFromFaction();
                     }
-                }
-                  
+                } 
 
                 if (GameNetwork.IsServer)
                 {
                     MatrixFrame frame = this.MoveObjectTick(dt);
                     base.SetFrameSynched(ref frame);
-                     
+
                     this.CheckIfLanded(oldFrame);
                     if (this.GetPilotAgent() != null)
                     {
                         this.checkHittingObject(oldFrame);
-                    } 
+                    }
                 }
-                  
+
                 if (!base.GameEntity.IsVisibleIncludeParents())
                 {
                     return;
@@ -830,9 +695,9 @@ namespace PersistentEmpiresLib.SceneScripts
                             if (userAgent != null)
                             {
                                 ActionIndexCache currentAction = userAgent.GetCurrentAction(1);
-                                if (!(currentAction == PE_ShipCanon.act_pickup_boulder_begin))
+                                if (!(currentAction == PE_ShipCannon.act_pickup_boulder_begin))
                                 {
-                                    if (currentAction == PE_ShipCanon.act_pickup_boulder_end)
+                                    if (currentAction == PE_ShipCannon.act_pickup_boulder_end)
                                     {
                                         MissionWeapon missionWeapon = new MissionWeapon(this.OriginalMissileItem, null, null, 1);
                                         userAgent.EquipWeaponToExtraSlotAndWield(ref missionWeapon);
@@ -843,7 +708,7 @@ namespace PersistentEmpiresLib.SceneScripts
                                             return;
                                         }
                                     }
-                                    else if (!userAgent.SetActionChannel(1, PE_ShipCanon.act_pickup_boulder_begin, false, 0UL, 0f, 1f, -0.2f, 0.4f, 0f, false, -0.2f, 0, true) && userAgent.Controller != Agent.ControllerType.AI)
+                                    else if (!userAgent.SetActionChannel(1, PE_ShipCannon.act_pickup_boulder_begin, false, 0UL, 0f, 1f, -0.2f, 0.4f, 0f, false, -0.2f, 0, true) && userAgent.Controller != Agent.ControllerType.AI)
                                     {
                                         userAgent.StopUsingGameObject(true);
                                     }
@@ -930,8 +795,9 @@ namespace PersistentEmpiresLib.SceneScripts
                         return;
                 }
             }
-            catch (Exception ex) {
-                Debug.Print("[ERROR WARSHIP LOG] " + ex.Message); 
+            catch (Exception ex)
+            {
+                Debug.Print("[ERROR WARSHIP LOG] " + ex.Message);
             }
         }
 
@@ -947,7 +813,7 @@ namespace PersistentEmpiresLib.SceneScripts
         {
             try
             {
-                if(base.GameEntity == null)
+                if (base.GameEntity == null)
                 {
                     return;
                 }
@@ -958,9 +824,9 @@ namespace PersistentEmpiresLib.SceneScripts
                 }
                 if (base.State == RangedSiegeWeapon.WeaponState.WaitingBeforeProjectileLeaving)
                 {
-                    this.UpdateProjectilePosition(); 
+                    this.UpdateProjectilePosition();
                 }
-                 
+
                 if (this._verticalAdjuster.Skeleton != null)
                 {
                     float parameter = MBMath.ClampFloat((this.currentReleaseAngle - this.BottomReleaseAngleRestriction) / (this.TopReleaseAngleRestriction - this.BottomReleaseAngleRestriction), 0f, 1f);
@@ -1006,15 +872,15 @@ namespace PersistentEmpiresLib.SceneScripts
                     }
                     if (base.PilotAgent != null)
                     {
-                          
+
                         ActionIndexCache currentAction = base.PilotAgent?.GetCurrentAction(1);
                         if (base.State == RangedSiegeWeapon.WeaponState.WaitingBeforeProjectileLeaving)
                         {
                             if (base.PilotAgent.IsInBeingStruckAction)
                             {
-                                if (currentAction != ActionIndexCache.act_none && currentAction != PE_ShipCanon.act_strike_bent_over)
+                                if (currentAction != ActionIndexCache.act_none && currentAction != PE_ShipCannon.act_strike_bent_over)
                                 {
-                                    base.PilotAgent.SetActionChannel(1, PE_ShipCanon.act_strike_bent_over, false, 0UL, 0f, 1f, -0.2f, 0.4f, 0f, false, -0.2f, 0, true);
+                                    base.PilotAgent.SetActionChannel(1, PE_ShipCannon.act_strike_bent_over, false, 0UL, 0f, 1f, -0.2f, 0.4f, 0f, false, -0.2f, 0, true);
                                 }
                             }
                             else if (!base.PilotAgent.SetActionChannel(1, this._shootAnimationActionIndex, false, 0UL, 0f, 1f, -0.2f, 0.4f, 0f, false, -0.2f, 0, true) && base.PilotAgent.Controller != Agent.ControllerType.AI)
@@ -1067,8 +933,9 @@ namespace PersistentEmpiresLib.SceneScripts
                     }
                 }
             }
-            catch (Exception e) {
-                Debug.Print("[ERROR LOG] " +  e.Message );
+            catch (Exception e)
+            {
+                Debug.Print("[ERROR LOG] " + e.Message);
             }
         }
 
@@ -1080,7 +947,7 @@ namespace PersistentEmpiresLib.SceneScripts
 
         // Token: 0x06002CCA RID: 11466 RVA: 0x000B0BA0 File Offset: 0x000AEDA0
         protected override void UpdateProjectilePosition()
-        { 
+        {
 
             GameEntity projectile_leaving_positionEntity = this.GameEntity.GetChildren().Where(c => c.Name.Equals("projectile_leaving_position_right")).FirstOrDefault();
 
@@ -1093,24 +960,24 @@ namespace PersistentEmpiresLib.SceneScripts
             {
                 MatrixFrame boneEntitialFrameWithIndex = this.SkeletonOwnerObjects[0].GameEntity.GetBoneEntitialFrameWithIndex(this._missileBoneIndex);
                 base.Projectile.GameEntity.SetFrame(ref boneEntitialFrameWithIndex);
-            } 
+            }
         }
 
         protected void UpdateCanonPosition()
-        { 
+        {
             GameEntity canon = this.GameEntity.GetChildren().Where(c => c.Name.Equals("Canon_Tube_Right")).FirstOrDefault();
 
-            if (canon != null && this.GetAimAgent() !=  null)
+            if (canon != null && this.GetAimAgent() != null)
             {
                 canonFrame.rotation.s.RotateAboutY(canonFrame.rotation.s.Y + currentDirection);
                 canonFrame.rotation.s.RotateAboutZ(canonFrame.rotation.s.Z + currentReleaseAngle);
-                canon.SetGlobalFrame(canonFrame); 
-            } 
+                canon.SetGlobalFrame(canonFrame);
+            }
         }
 
         protected override void HandleUserAiming(float dt)
         {
-            base.HandleUserAiming(dt); 
+            base.HandleUserAiming(dt);
             // this.UpdateCanonPosition(); 
         }
 
@@ -1223,8 +1090,7 @@ namespace PersistentEmpiresLib.SceneScripts
                 base.HasAmmo = value;
             }
         }
-
-
+         
 
         // Token: 0x06002CD3 RID: 11475 RVA: 0x000B0DC8 File Offset: 0x000AEFC8
         protected override void ApplyAimChange()
@@ -1245,13 +1111,13 @@ namespace PersistentEmpiresLib.SceneScripts
                     try
                     {
                         NetworkCommunicator player = pilotAgent.MissionPeer.GetNetworkPeer();
-                        PersistentEmpireRepresentative persistentEmpireRepresentative = player.GetComponent<PersistentEmpireRepresentative>(); 
+                        PersistentEmpireRepresentative persistentEmpireRepresentative = player.GetComponent<PersistentEmpireRepresentative>();
                         return new TextObject("{=NbpcDXtJ} " + persistentEmpireRepresentative.GetFaction().name + "'s " + " Warship", null).ToString();
                     }
                     catch (Exception ex)
                     {
                         Debug.Print("[ERROR WARSHIP GetDescriptionText LOG] " + ex.Message);
-                    }   
+                    }
                 }
                 return new TextObject("{=NbpcDXtJ} Warship", null).ToString();
             }
@@ -1390,9 +1256,10 @@ namespace PersistentEmpiresLib.SceneScripts
 
                         Banner banner = persistentEmpireRepresentative.GetFaction().banner;
                         BannerRenderer.RequestRenderBanner(banner, this.GameEntity);
-                    }catch (Exception ex) 
-                    { 
-                        Debug.Print("[ERROR WARSHIP Banner LOG] " + ex.Message); 
+                    }
+                    catch (Exception ex)
+                    {
+                        Debug.Print("[ERROR WARSHIP Banner LOG] " + ex.Message);
                     }
                 }
             }
@@ -1401,7 +1268,7 @@ namespace PersistentEmpiresLib.SceneScripts
 
         public void SetHitPoint(float hitPoint, Vec3 impactDirection)
         {
-              
+
             this.HitPoint = hitPoint;
             MatrixFrame globalFrame = base.GameEntity.GetGlobalFrame();
 
@@ -1443,9 +1310,9 @@ namespace PersistentEmpiresLib.SceneScripts
                 {
                     Mission.Current.MakeSound(SoundEvent.GetEventIdFromString(this.SoundEffectOnRepair), globalFrame.origin, false, true, -1, -1);
                 }
-            } 
+            }
         }
-         
+
 
         protected override bool OnHit(Agent attackerAgent, int damage, Vec3 impactPosition, Vec3 impactDirection, in MissionWeapon weapon, ScriptComponentBehavior attackerScriptComponentBehavior, out bool reportDamage)
         {
@@ -1480,7 +1347,7 @@ namespace PersistentEmpiresLib.SceneScripts
                         }
                         return false;
                     }
-                    
+
 
                     if ((this.HitPoint + this.RepairDamage) < this.MaxHitPoint)
                     {
@@ -1493,15 +1360,15 @@ namespace PersistentEmpiresLib.SceneScripts
                         this.SetHitPoint(this.HitPoint + this.RepairDamage, impactDirection);
                     }
                     else
-                    { 
+                    {
                         foreach (RepairReceipt r in this.receipt)
                         {
                             persistentEmpireRepresentative.GetInventory().RemoveCountedItem(r.RepairItem, r.NeededCount);
                         }
-                        InformationComponent.Instance.SendMessage(this.MaxHitPoint + ", repaired", 0x02ab89d9, player); 
-                        this.SetHitPoint(this.MaxHitPoint, impactDirection); 
+                        InformationComponent.Instance.SendMessage(this.MaxHitPoint + ", repaired", 0x02ab89d9, player);
+                        this.SetHitPoint(this.MaxHitPoint, impactDirection);
                     }
-                     
+
                     if (GameNetwork.IsServer)
                     {
                         LoggerHelper.LogAnAction(attackerAgent.MissionPeer.GetNetworkPeer(), LogAction.PlayerRepairesTheDestructable, null, new object[] { this.GetType().Name });
@@ -1540,7 +1407,7 @@ namespace PersistentEmpiresLib.SceneScripts
                 reportDamage = false;
                 return false;
             }
-             
+
         }
 
         public void OnEntityRemove()

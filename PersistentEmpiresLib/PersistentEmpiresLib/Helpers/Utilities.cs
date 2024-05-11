@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TaleWorlds.Engine;
 using TaleWorlds.Library;
 
 namespace PersistentEmpiresLib.Helpers
@@ -72,9 +73,33 @@ namespace PersistentEmpiresLib.Helpers
 
             }
 
-            return found;
-
-
+            return found; 
         }
+
+        private static float GetDistanceByAngle(Vec3 centerPoint, float hs, float vs, double t_rad)
+        {
+            float x = centerPoint.X + (hs * (float)Math.Cos(t_rad));
+            float y = centerPoint.Y + (vs * (float)Math.Sin(t_rad));
+            float z = centerPoint.z;
+            Vec3 newVecByAngle = new Vec3(x, y, z);
+            return centerPoint.Distance(newVecByAngle);
+        }
+
+        private static Vec3 GetCollisonPointByAngle(Vec3 centerPoint, float hs, float vs, double t_rad)
+        {
+            float x = centerPoint.X + (hs * (float)Math.Cos(t_rad));
+            float y = centerPoint.Y + (vs * (float)Math.Sin(t_rad));
+            float z = centerPoint.z;
+            return new Vec3(x, y, z);
+        }
+
+        private static double GetRadian(GameEntity e1, GameEntity e2)
+        {
+            Vec3 currentEnityVecRotationS = e1.GetGlobalFrame().rotation.s;
+            Vec3 enityVecRotationS = e2.GetGlobalFrame().rotation.s;
+            var dot = Vec3.DotProduct(currentEnityVecRotationS, enityVecRotationS);
+            return Math.Acos(Vec3.DotProduct(currentEnityVecRotationS, enityVecRotationS) / (currentEnityVecRotationS.Length) * enityVecRotationS.Length);
+        }
+
     }
 }

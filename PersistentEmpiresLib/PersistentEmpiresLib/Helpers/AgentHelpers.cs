@@ -201,5 +201,10 @@ namespace PersistentEmpiresLib.Helpers
             newAgent.Health = oldHealdth;
             return newAgent;
         }
+
+        public static float GetConfigCharacterAdjustHealth()
+        {  
+            return  ConfigManager.GetFloatConfig("CharacterAdjustHealth", 0f);
+        }
     }
 }
