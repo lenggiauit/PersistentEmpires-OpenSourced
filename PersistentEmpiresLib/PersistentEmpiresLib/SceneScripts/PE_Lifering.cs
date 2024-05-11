@@ -1,26 +1,15 @@
-﻿using Helpers;
-using PersistentEmpiresLib.Helpers;
-using PersistentEmpiresLib.NetworkMessages.Client;
-using PersistentEmpiresLib.PersistentEmpiresMission;
+﻿using PersistentEmpiresLib.Helpers; 
 using PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors;
 using PersistentEmpiresLib.SceneScripts.Extensions;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Diagnostics.Eventing.Reader;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Timers;
-using System.Windows;
+using System.Collections.Generic; 
+using System.Linq; 
 using TaleWorlds.Core;
 using TaleWorlds.Engine;
 using TaleWorlds.InputSystem;
 using TaleWorlds.Library;
 using TaleWorlds.Localization;
-using TaleWorlds.MountAndBlade;
-using TaleWorlds.ObjectSystem;
-using Timer = TaleWorlds.Core.Timer;
+using TaleWorlds.MountAndBlade;  
 
 namespace PersistentEmpiresLib.SceneScripts
 {
