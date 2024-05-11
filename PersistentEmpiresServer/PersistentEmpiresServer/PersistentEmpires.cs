@@ -1,5 +1,6 @@
 ﻿using PersistentEmpiresHarmony;
 using PersistentEmpiresHarmony.Patches;
+using PersistentEmpiresLib;
 using PersistentEmpiresLib.GameModes;
 using PersistentEmpiresLib.PersistentEmpiresGameModels;
 using PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors;
@@ -37,7 +38,7 @@ namespace PersistentEmpiresServer
 
             starterObject.AddModel(new PEAgentStatCalculateModel());
             starterObject.AddModel(new DefaultItemValueModel());
-            starterObject.AddModel(new PEAgentApplyDamageModel());
+            starterObject.AddModel(new PEAgentApplyDamageModel()); 
 
             PersistentEmpireSkills.Initialize(game);
         }
@@ -55,8 +56,9 @@ namespace PersistentEmpiresServer
 
             AdminServerBehavior.OnIsPlayerBanned += DBBanRecordRepository.IsPlayerBanned;
             AdminServerBehavior.OnBanPlayer += DBBanRecordRepository.AdminServerBehavior_OnBanPlayer;
+           // AdminServerBehavior.OnAddBot += DBBanRecordRepository.AdminServerBehavior_OnBanPlayer;
 
-            TaleWorlds.MountAndBlade.Module.CurrentModule.AddMultiplayerGameMode(new PersistentEmpiresGameMode("PersistentEmpires"));
+            TaleWorlds.MountAndBlade.Module.CurrentModule.AddMultiplayerGameMode(new PersistentEmpiresGameMode(ConfigManager.ModuleId));
         }
     }
 }

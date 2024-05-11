@@ -19,7 +19,7 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
         private bool isActive;
         private List<string> ParseXml()
         {
-            string Animations = ModuleHelper.GetXmlPath("PersistentEmpires", "Animations");
+            string Animations = ModuleHelper.GetXmlPath(ConfigManager.ModuleId, "Animations");
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.Load(Animations);
 

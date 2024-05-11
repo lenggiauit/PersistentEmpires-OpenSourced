@@ -19,11 +19,12 @@ namespace PersistentEmpiresSave
 {
     public class PersistentEmpireSaveSubModule : MBSubModuleBase
     {
+        public static string ModuleId = "DragonVStudio";
         public static string XmlFile = "SaveConfig";
         public static string ConnectionString = "";
         public static string GetConnectionString()
         {
-            string xmlPath = ModuleHelper.GetXmlPath("PersistentEmpires", "Configs/" + XmlFile);
+            string xmlPath = ModuleHelper.GetXmlPath(ModuleId, "Configs/" + XmlFile);
             XmlDocument xmlDocument = new XmlDocument();
             xmlDocument.Load(xmlPath);
             XmlNode element = xmlDocument.SelectSingleNode("/DatabaseConfig/ConnectionString");

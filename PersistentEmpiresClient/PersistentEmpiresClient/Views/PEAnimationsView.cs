@@ -29,7 +29,7 @@ namespace PersistentEmpires.Views.Views
         private List<PEAnimationSubMenuVM> ParseXml()
         {
             List<PEAnimationSubMenuVM> animationSubMenuVMs = new List<PEAnimationSubMenuVM>();
-            string Animations = ModuleHelper.GetXmlPath("PersistentEmpires", "Animations");
+            string Animations = ModuleHelper.GetXmlPath("DragonVStudio", "Animations");
             XmlDocument xmlDoc = new XmlDocument();
             xmlDoc.Load(Animations);
 

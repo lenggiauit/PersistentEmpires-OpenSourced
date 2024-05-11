@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.IdentityModel.Tokens;
+using PersistentEmpiresLib;
 using System;
 using System.IdentityModel.Tokens.Jwt;
 using System.Runtime.CompilerServices;
@@ -14,13 +15,14 @@ namespace PersistentEmpiresAPI
 {
     public class PersistentEmpiresAPISubModule : MBSubModuleBase
     {
+        public static string ModuleId = "DragonVStudio";
         public static string XmlFile = "ApiConfig";
         public static string SecretKey = "";
         private IWebHost _host;
 
         public static int GetConfigPort()
         {
-            string xmlPath = ModuleHelper.GetXmlPath("PersistentEmpires", "Configs/" + XmlFile);
+            string xmlPath = ModuleHelper.GetXmlPath(ModuleId, "Configs/" + XmlFile);
             XmlDocument xmlDocument = new XmlDocument();
             xmlDocument.Load(xmlPath);
             XmlNode portElement = xmlDocument.SelectSingleNode("/ApiConfig/Port");
@@ -29,7 +31,7 @@ namespace PersistentEmpiresAPI
 
         public static string GetSecretKey()
         {
-            string xmlPath = ModuleHelper.GetXmlPath("PersistentEmpires", "Configs/" + XmlFile);
+            string xmlPath = ModuleHelper.GetXmlPath(ModuleId, "Configs/" + XmlFile);
             XmlDocument xmlDocument = new XmlDocument();
             xmlDocument.Load(xmlPath);
             XmlNode secretElement = xmlDocument.SelectSingleNode("/ApiConfig/SecretKey");

@@ -28,12 +28,16 @@ namespace PersistentEmpiresLib
         public Timer SpawnTimer;
         public int LoadedHealth = 100;
         public bool IsAdmin = false;
+        public bool IsSpawnableItemAdmin = false;
+        public bool IsPrisoner { get; set; }
         public bool IsFirstAgentSpawned = false; // To check if player's initial agent is spawned on connection
         public bool KickedFromFaction = false;
         public long DisconnectedAt = 0;
         public bool LoadFromDb = false;
         public Vec3 LoadedDbPosition;
         public Equipment LoadedSpawnEquipment;
+
+        public string AttachToAgentId {  get; set; } 
 
         public int[] LoadedAmmo { get; set; }
 

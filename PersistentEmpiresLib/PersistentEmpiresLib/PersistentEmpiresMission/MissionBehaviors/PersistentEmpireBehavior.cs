@@ -201,7 +201,7 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
             {
                 persistentEmpireRepresentative.SetClass("pe_serf");
                 persistentEmpireRepresentative.KickedFromFaction = false;
-            }
+            }  
         }
 
         private bool checkAlphaNumeric(String name)
@@ -287,6 +287,17 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
                     persistentEmpireRepresentative.SetGold(dbPlayer.Money);
                     persistentEmpireRepresentative.SetHunger(dbPlayer.Hunger);
                     this._factionsBehavior.SetPlayerFaction(networkPeer, dbPlayer.FactionIndex, -1);
+
+                    int prisonFactionIndex = ConfigManager.GetIntConfig("PrisonFactionIndex", 14);
+
+                    if (dbPlayer.FactionIndex == prisonFactionIndex)
+                    {
+                        persistentEmpireRepresentative.IsPrisoner = true;
+                    }
+                    else
+                    {
+                        persistentEmpireRepresentative.IsPrisoner = false;
+                    }
 
                     persistentEmpireRepresentative.LoadedDbPosition = new Vec3(dbPlayer.PosX, dbPlayer.PosY, dbPlayer.PosZ);
                     Equipment loadedEquipment = new Equipment();

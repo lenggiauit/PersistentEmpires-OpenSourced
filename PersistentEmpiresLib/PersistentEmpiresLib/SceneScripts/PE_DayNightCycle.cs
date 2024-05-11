@@ -39,7 +39,7 @@ namespace PersistentEmpiresLib.SceneScripts
 			this.TimeOfDay += (0.000106f * this.SpeedMultiplier);
 			if (this.TimeOfDay >= 24f) this.TimeOfDay -= 24f;
 			if (GameNetwork.IsClient && tickCount == 0) {
-				this.ApplyAtmosphere(false);
+				this.ApplyAtmosphere(true);
 			}
 			tickCount = (tickCount + 1) % 7400;
 
@@ -50,12 +50,12 @@ namespace PersistentEmpiresLib.SceneScripts
 			this.TimeOfDay = MBMath.ClampFloat(this.TimeOfDay, 0f, 23.99f);
 			this.SeasonTimeFactor = MBMath.ClampFloat(this.SeasonTimeFactor, 0f, 1f);
 			MBMapScene.SetFrameForAtmosphere(base.Scene, this.TimeOfDay * 10f, base.Scene.LastFinalRenderCameraFrame.origin.z, forceLoadTextures);
-			/*float valueFrom = 0.55f;
+			float valueFrom = 0.55f;
 			float valueTo = -0.1f;
 			float seasonTimeFactor = this.SeasonTimeFactor;
 			Vec3 dynamic_params = new Vec3(0f, 0.65f, 0f, -1f);
 			dynamic_params.x = MBMath.Lerp(valueFrom, valueTo, seasonTimeFactor, 1E-05f);
-			MBMapScene.SetTerrainDynamicParams(base.Scene, dynamic_params);*/
+			MBMapScene.SetTerrainDynamicParams(base.Scene, dynamic_params); 
 		}
 	}
 }

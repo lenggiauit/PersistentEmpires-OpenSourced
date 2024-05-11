@@ -168,11 +168,22 @@ namespace PersistentEmpiresAPI.Controllers
         [HttpGet("servercap")]
         public ActionResult<ResultDTO> ServerCap()
         {
-            return new ResultDTO
+            try
             {
-                Status = true,
-                Reason = GameNetwork.NetworkPeerCount.ToString()
-            };
+                return new ResultDTO
+                {
+                    Status = true,
+                    Reason = GameNetwork.NetworkPeerCount.ToString()
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ResultDTO
+                {
+                    Status = true,
+                    Reason = ex.Message
+                };
+            }
         }
 
         [HttpGet("restart")]

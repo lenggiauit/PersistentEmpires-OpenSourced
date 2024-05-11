@@ -20,7 +20,7 @@ namespace PersistentEmpires.Views
 
         private static void OnPrint(string arg1, ulong arg2)
         {
-            var path = Path.Combine(ModuleHelper.GetModuleFullPath("PersistentEmpires"), "debugLog.txt");
+            var path = Path.Combine(ModuleHelper.GetModuleFullPath("DragonVStudio"), "debugLog.txt");
             File.AppendAllText(path, arg1 + "\n");
         }
     }

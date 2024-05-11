@@ -47,7 +47,27 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
                 frame = this.DefaultSpawnFrames[randomIndex];
             }
             PersistentEmpireRepresentative persistentEmpireRepresentative = peer.GetComponent<PersistentEmpireRepresentative>();
-            persistentEmpireRepresentative.SetSpawnFrame(frame);
+            if (!persistentEmpireRepresentative.IsPrisoner)
+            {
+                persistentEmpireRepresentative.SetSpawnFrame(frame);
+                // Debug.Print("** IsPrisoner IsPrisoner IsPrisoner IsPrisoner IsPrisoner : " + (persistentEmpireRepresentative.IsPrisoner ? "Prisoner" : ""), 0, Debug.DebugColor.Red);
+            }
+            else
+            {
+                // 14 is prison faction current map (Dragon V continent)
+                int prisonFactionIndex = ConfigManager.GetIntConfig("PrisonFactionIndex", 14);
+                List<PE_SpawnFrame> framePrisons = persistentEmpireRepresentative.GetSpawnableCastleFrames();
+                if (framePrisons.Count > 0) {
+                    persistentEmpireRepresentative.SetSpawnFrame(framePrisons[0]);
+                   // Debug.Print("**  prisonFactionIndex prisonFactionIndex prisonFactionIndex : " + (persistentEmpireRepresentative.IsPrisoner ? "Prisoner" : ""), 0, Debug.DebugColor.Red);
+                }
+                else
+                {
+                    persistentEmpireRepresentative.SetSpawnFrame(frame);
+                   // Debug.Print("**  prisonFactionIndex prisonFactionIndex prisonFactionIndex is null: " + ( persistentEmpireRepresentative.IsPrisoner? "Prisoner" : ""), 0, Debug.DebugColor.Red);
+                }
+
+            }  
             return true;
         }
     }

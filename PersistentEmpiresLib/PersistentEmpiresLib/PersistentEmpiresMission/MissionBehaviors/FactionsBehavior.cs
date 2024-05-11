@@ -114,10 +114,11 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
                 BasicCultureObject outlawCulture = MBObjectManager.Instance.GetObject<BasicCultureObject>("empire");
 
                 Banner banner = new Banner(commonerCulture.BannerKey, commonerCulture.BackgroundColor1, commonerCulture.ForegroundColor1);
-                Banner banner2 = new Banner("24.193.116.1536.1536.768.768.1.0.0");
+                Banner banner2 = new Banner("11.116.116.1408.1101.764.764.1.0.0.309.40.116.735.435.764.764.1.0.0.309.40.116.735.435.764.764.1.1.0.347.40.116.250.250.764.524.1.0.0");
+               //Banner banner2 = new Banner("24.193.116.1536.1536.768.768.1.0.0");
 
                 Faction commoners = new Faction(commonerCulture, banner, "Commoners");
-                Faction outlaws = new Faction(outlawCulture, banner2, "Outlaws");
+                Faction outlaws = new Faction(outlawCulture, banner2, ConfigManager.GetStrConfig("OutlawsFactionName",  "Outlaws"));
 
                 //Factions Setup
 
@@ -625,6 +626,18 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
             }
         }
 
+        public void SetPrisoner(NetworkCommunicator player)
+        {
+            // 14 is prison faction current map (Dragon V continent)
+            int prisonFactionIndex = ConfigManager.GetIntConfig("PrisonFactionIndex", 14); 
+            float prisonPositionX = ConfigManager.GetFloatConfig("PrisonPositionX", 1156.03f);
+            float prisonPositionY = ConfigManager.GetFloatConfig("PrisonPositionY", 84.0838f);
+            float prisonPositionZ = ConfigManager.GetFloatConfig("PrisonPositionZ", 10.8729f); 
+            PersistentEmpireRepresentative playerPE = player.GetComponent<PersistentEmpireRepresentative>(); 
+            SetPlayerFaction(player, prisonFactionIndex, playerPE.GetFactionIndex());
+
+        }
+
         public void SetPlayerFaction(NetworkCommunicator player, int factionIndex, int joinedFrom)
         {
             PersistentEmpireRepresentative persistentEmpireRepresentative = player.GetComponent<PersistentEmpireRepresentative>();
@@ -664,6 +677,11 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
                 }
                 this.Factions[persistentEmpireRepresentative.GetFactionIndex()].members.Remove(player);
             }
+            int prisonFactionIndex = ConfigManager.GetIntConfig("PrisonFactionIndex", 14);
+
+            // set IsPrisoner = true when factionIndex = prisonFactionIndex
+            persistentEmpireRepresentative.IsPrisoner = factionIndex == prisonFactionIndex;
+
             if (factionIndex != -1)
             {
                 LoggerHelper.LogAnAction(player, LogAction.PlayerFactionChange, null, new object[] { persistentEmpireRepresentative.GetFaction(), this.Factions[factionIndex] });

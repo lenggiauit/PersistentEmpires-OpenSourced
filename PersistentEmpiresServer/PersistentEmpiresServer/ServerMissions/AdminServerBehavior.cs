@@ -17,6 +17,7 @@ using TaleWorlds.ModuleManager;
 using TaleWorlds.ObjectSystem;
 using TaleWorlds.MountAndBlade.DedicatedCustomServer;
 using PersistentEmpiresMission.MissionBehaviors;
+using PersistentEmpiresLib.Factions;
 
 namespace PersistentEmpiresServer.ServerMissions
 {
@@ -29,6 +30,7 @@ namespace PersistentEmpiresServer.ServerMissions
 
         public string BanFile = "BannedPlayers.txt";
         public string AdminFile = "AdminPlayers.txt";
+        public string AdminSpawnItemsFile = "AdminSpawnItems.txt";
         public bool DisableGlobalChat = false;
 
         public Dictionary<NetworkCommunicator, bool> Freezed = new Dictionary<NetworkCommunicator, bool>();
@@ -40,16 +42,26 @@ namespace PersistentEmpiresServer.ServerMissions
         public delegate void BanPlayerDelegate(string PlayerId, string PlayerName, long BanEndsAt);
         public static event BanPlayerDelegate OnBanPlayer;
 
+        public delegate void AddBotDelegate();
+        public static event AddBotDelegate OnAddBot;
+
         public static AdminServerBehavior Instance { get; private set; }
+        private FactionsBehavior factionsBehavior;
 
         public string BanFilePath()
         {
-            return ModuleHelper.GetModuleFullPath("PersistentEmpires") + this.BanFile;
+            return ModuleHelper.GetModuleFullPath( ConfigManager.ModuleId ) + this.BanFile;
         }
         public string AdminPlayerFilePath()
         {
-            return ModuleHelper.GetModuleFullPath("PersistentEmpires") + this.AdminFile;
+            return ModuleHelper.GetModuleFullPath( ConfigManager.ModuleId ) + this.AdminFile;
         }
+        public string AdminSpawnItemsFilePath()
+        {
+            return ModuleHelper.GetModuleFullPath(ConfigManager.ModuleId) + this.AdminSpawnItemsFile;
+        }
+
+
         public void BanPlayer(NetworkCommunicator player, int seconds)
         {
             long bannedUntil = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + seconds;
@@ -89,7 +101,8 @@ namespace PersistentEmpiresServer.ServerMissions
             }
             if (IsPlayerAdmin(networkPeer))
             {
-                networkPeer.GetComponent<PersistentEmpireRepresentative>().IsAdmin = true;
+                networkPeer.GetComponent<PersistentEmpireRepresentative>().IsAdmin = true; 
+                networkPeer.GetComponent<PersistentEmpireRepresentative>().IsSpawnableItemAdmin =  IsSpawnItemsAdmin(networkPeer); 
                 GameNetwork.BeginModuleEventAsServer(networkPeer);
                 GameNetwork.WriteMessage(new AuthorizeAsAdmin());
                 GameNetwork.EndModuleEventAsServer();
@@ -114,6 +127,27 @@ namespace PersistentEmpiresServer.ServerMissions
 
             return false;
         }
+
+        public bool IsSpawnItemsAdmin(NetworkCommunicator player)
+        {
+            if (!File.Exists(AdminSpawnItemsFilePath())) return false;
+
+            string[] lines = File.ReadAllLines(AdminSpawnItemsFilePath());
+
+            foreach (string line in lines)
+            {
+                if (line.Trim().Equals("")) continue;
+                string adminId = line.Trim();
+
+                if (player.VirtualPlayer.Id.ToString().Equals(adminId))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }  
+
         public bool IsPlayerBanned(NetworkCommunicator player)
         {
             if (OnIsPlayerBanned != null)
@@ -157,6 +191,8 @@ namespace PersistentEmpiresServer.ServerMissions
             cooldown = ConfigManager.GetIntConfig("NameChangeCooldownInSeconds", 3600);
 
             Main.IsAdminFunc = IsPlayerAdmin;
+            // factionsBehavior
+            this.factionsBehavior = base.Mission.GetMissionBehavior<FactionsBehavior>();
         }
 
         public override void OnRemoveBehavior()
@@ -180,6 +216,9 @@ namespace PersistentEmpiresServer.ServerMissions
                 networkMessageHandlerRegisterer.Register<RequestTpTo>(this.HandleRequestTpToFromClient);
                 networkMessageHandlerRegisterer.Register<RequestHeal>(this.HandleRequestHealFromClient);
                 networkMessageHandlerRegisterer.Register<RequestUnWound>(this.HandleRequestunWoundFromClient);
+                // 
+                networkMessageHandlerRegisterer.Register<RequestPrison>(this.HandleRequestPrisonFromClient); 
+                //
                 networkMessageHandlerRegisterer.Register<RequestItemSpawn>(this.HandleRequestItemSpawn);
                 networkMessageHandlerRegisterer.Register<RequestAdminJoinFaction>(this.HandleRequestAdminJoinFaction);
                 networkMessageHandlerRegisterer.Register<RequestAdminResetFactionBanner>(this.HandleRequestAdminResetFactionBanner);
@@ -245,7 +284,7 @@ namespace PersistentEmpiresServer.ServerMissions
         private bool HandleRequestAdminGold(NetworkCommunicator player, RequestAdminGold message)
         {
             PersistentEmpireRepresentative persistentEmpireRepresentative = player.GetComponent<PersistentEmpireRepresentative>();
-            if (!persistentEmpireRepresentative.IsAdmin)
+            if (!persistentEmpireRepresentative.IsSpawnableItemAdmin)
             {
                 return false;
             }
@@ -294,7 +333,7 @@ namespace PersistentEmpiresServer.ServerMissions
         private bool HandleRequestItemSpawn(NetworkCommunicator player, RequestItemSpawn message)
         {
             PersistentEmpireRepresentative persistentEmpireRepresentative = player.GetComponent<PersistentEmpireRepresentative>();
-            if (!persistentEmpireRepresentative.IsAdmin)
+            if (!persistentEmpireRepresentative.IsSpawnableItemAdmin)
             {
                 return false;
             }
@@ -335,6 +374,7 @@ namespace PersistentEmpiresServer.ServerMissions
         public bool HandleRequestTempBanFromClient(NetworkCommunicator player, RequestTempBan requestTempBan)
         {
             PersistentEmpireRepresentative persistentEmpireRepresentative = player.GetComponent<PersistentEmpireRepresentative>();
+            int tempBan = ConfigManager.GetIntConfig("TempBanHours", 24);
             if (!persistentEmpireRepresentative.IsAdmin)
             {
                 return false;
@@ -350,14 +390,14 @@ namespace PersistentEmpiresServer.ServerMissions
             }
             if (OnBanPlayer == null)
             {
-                this.BanPlayer(requestTempBan.Player, 1 * 60 * 60); // 6 fuckin hours
+                this.BanPlayer(requestTempBan.Player, tempBan * 60 * 60); // 6 fuckin hours
             }
             else
-            {
-                OnBanPlayer(requestTempBan.Player.VirtualPlayer.Id.ToString(), requestTempBan.Player.UserName, DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 1 * 60 * 60);
+            {  
+                OnBanPlayer(requestTempBan.Player.VirtualPlayer.Id.ToString(), requestTempBan.Player.UserName, DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 1 * tempBan * 60 * 60);
             }
             LoggerHelper.LogAnAction(player, LogAction.PlayerTempBanPlayer, new AffectedPlayer[] { new AffectedPlayer(requestTempBan.Player) });
-            InformationComponent.Instance.SendMessage("Suspect banned for 6 hours.", new Color(0f, 0f, 1f).ToUnsignedInteger(), player);
+            InformationComponent.Instance.SendMessage(string.Format("Suspect banned for {0} hours.", tempBan), new Color(0f, 0f, 1f).ToUnsignedInteger(), player);
             return true;
         }
         public bool HandleRequestPermBanFromClient(NetworkCommunicator admin, RequestPermBan message)
@@ -621,5 +661,74 @@ namespace PersistentEmpiresServer.ServerMissions
 
             return true;
         }
+
+        public bool HandleRequestPrisonFromClient(NetworkCommunicator admin, RequestPrison message)
+        {
+            PersistentEmpireRepresentative persistentEmpireRepresentative = admin.GetComponent<PersistentEmpireRepresentative>();
+            if (!persistentEmpireRepresentative.IsAdmin)
+            {
+                return false;
+            }
+            if (message.Player == null)
+            {
+                return false;
+            }
+            if (message.Player.ControlledAgent == null || !message.Player.ControlledAgent.IsActive())
+            {
+                InformationComponent.Instance.SendMessage("Target is not spawned yet", new Color(1f, 0f, 0f).ToUnsignedInteger(), message.Player);
+                return false;
+            }
+
+            // 14 is prison faction current map (Dragon V continent)
+            int prisonFactionIndex = ConfigManager.GetIntConfig("PrisonFactionIndex", 14);
+             
+            float prisonPositionX = ConfigManager.GetFloatConfig("PrisonPositionX", 1156.03f);
+            float prisonPositionY = ConfigManager.GetFloatConfig("PrisonPositionY", 84.0838f);
+            float prisonPositionZ = ConfigManager.GetFloatConfig("PrisonPositionZ", 10.8729f);
+
+
+            PersistentEmpireRepresentative playerPE = message.Player.GetComponent<PersistentEmpireRepresentative>();
+
+            // set player faction to Prison
+            factionsBehavior.SetPrisoner(message.Player);
+            playerPE.IsPrisoner = true;
+            //
+
+            Vec3 targetPos = new Vec3(prisonPositionX, prisonPositionY, prisonPositionZ);
+             
+            if (message.Player.ControlledAgent.MountAgent == null)
+            { 
+                message.Player.ControlledAgent.TeleportToPosition(targetPos);
+            }
+            else
+            {
+                message.Player.ControlledAgent.MountAgent.TeleportToPosition(targetPos);
+            } 
+            //
+
+            LoggerHelper.LogAnAction(admin, LogAction.PlayerHealedPlayer, new AffectedPlayer[] { new AffectedPlayer(message.Player) });
+
+            return true;
+        }
+
+
+          
+
+        public bool HandleAddBotFromClient(NetworkCommunicator admin)
+        {
+            PersistentEmpireRepresentative persistentEmpireRepresentative = admin.GetComponent<PersistentEmpireRepresentative>();
+            if (!persistentEmpireRepresentative.IsAdmin)
+            {
+                return false;
+            }
+            if (OnAddBot != null)
+            {
+                OnAddBot();
+                InformationComponent.Instance.SendMessage(string.Format("Add bot." ), new Color(0f, 0f, 1f).ToUnsignedInteger(), admin);
+            }  
+            return true;
+        }
+         
+
     }
 }

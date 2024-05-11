@@ -18,7 +18,7 @@ namespace PersistentEmpiresServer
     {
         [MissionMethod]
         public static void OpenPersistentEmpires(string scene) {
-            MissionState.OpenNew("PersistentEmpires", new MissionInitializerRecord(scene), delegate (Mission missionController)
+            MissionState.OpenNew("DragonVStudio"  , new MissionInitializerRecord(scene), delegate (Mission missionController)
             {
                 return new MissionBehavior[]
                     {
@@ -46,6 +46,9 @@ namespace PersistentEmpiresServer
                         new MoneyPouchBehavior(),
                         new StockpileMarketComponent(),
                         new LocalChatComponent(),
+
+                         new DragonVItemBehavior(),
+
                         new InstrumentsBehavior(),
                         new CombatlogBehavior(),
 						// new WhitelistBehavior(),
@@ -53,6 +56,8 @@ namespace PersistentEmpiresServer
                         new SpawnFrameSelectionBehavior(),
 						// new ConsoleMatchStartEndHandler(),
 						new SpawnComponent(new PersistentEmpireSpawnFrameBehavior(), new PersistentEmpiresSpawningBehavior()),
+                        // To add bots
+                        //new SpawnComponent(new BOTsSpawnFrameBehavior(), new BOTSpawnFrameBehavior()),
                         new MissionLobbyEquipmentNetworkComponent(),
                         new ProximityChatComponent(),
 						// new MultiplayerTeamSelectComponent(),
@@ -77,12 +82,14 @@ namespace PersistentEmpiresServer
                         new AutorestartBehavior(),
                         new AnimationBehavior(),
                         new ChatCommandSystem(),
-                        new WhitelistBehavior(),
-						// new AgentHumanAILogic(),
+                        new WhitelistBehavior(), 
+						//new AgentHumanAILogic(),
+      //                  new AgentCommonAILogic(), 
 						// new EquipmentControllerLeaveLogic(),
 						// new MultiplayerPreloadHelper()
                         //
-                        new DiscordRoleRegistryBehavior()
+                        new DiscordRoleRegistryBehavior(), 
+                       
 
                     };
             }, true, true);

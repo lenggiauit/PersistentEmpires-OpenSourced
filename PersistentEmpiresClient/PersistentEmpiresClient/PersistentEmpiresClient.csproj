@@ -21,7 +21,7 @@
     <DefineConstants>TRACE;DEBUG;CLIENT</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <OutputPath>bin\RunAsClientDebug</OutputPath>
+    <OutputPath>..\..\..\..\Steam games\steamapps\common\Mount &amp; Blade II Bannerlord\Modules\DragonVStudio\bin\Win64_Shipping_Client\</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <DefineConstants />

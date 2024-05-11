@@ -30,7 +30,7 @@ namespace PersistentEmpiresLib.SceneScripts
     public class PE_ImportExport : PE_UsableFromDistance
     {
         public string XmlFile = "importexport";
-        public string ModuleFolder = "PersistentEmpires";
+        public string ModuleFolder = ConfigManager.ModuleId;
         public string TradeableItems { get; private set; }
         private List<GoodItem> goodItems;
         private ImportExportComponent importExportComponent;
@@ -44,7 +44,14 @@ namespace PersistentEmpiresLib.SceneScripts
             descriptionMessage.SetTextVariable("KEY", HyperlinkTexts.GetKeyHyperlinkText(HotKeyManager.GetHotKeyId("CombatHotKeyCategory", 13)));
             base.DescriptionMessage = descriptionMessage;
             Debug.Print("Initiating ImportExport Market With " + this.ModuleFolder + " Module");
-            string xmlPath = ModuleHelper.GetXmlPath(this.ModuleFolder, "Markets/" + this.XmlFile);
+
+            // temp set
+            string xmlPath = ModuleHelper.GetXmlPath("DragonVStudio", "Markets/" + this.XmlFile);
+
+            //string xmlPath = ModuleHelper.GetXmlPath(this.ModuleFolder, "Markets/" + this.XmlFile);
+
+
+
             XmlDocument xmlDocument = new XmlDocument();
             xmlDocument.Load(xmlPath);
 

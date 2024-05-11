@@ -543,4 +543,44 @@ namespace PersistentEmpiresLib.NetworkMessages.Client
             GameNetworkMessage.WriteNetworkPeerReferenceToPacket(this.Player);
         }
     }
+
+    // Prison
+    [DefineGameNetworkMessageTypeForMod(GameNetworkMessageSendType.FromClient)]
+    public sealed class RequestPrison : GameNetworkMessage
+    {
+        public NetworkCommunicator Player;
+        public RequestPrison() { }
+        public RequestPrison(NetworkCommunicator player)
+        {
+            this.Player = player;
+        }
+
+        protected override MultiplayerMessageFilter OnGetLogFilter()
+        {
+            return MultiplayerMessageFilter.Administration;
+        }
+
+        protected override string OnGetLogFormat()
+        {
+            return "Received RequestPrison";
+        }
+
+        protected override bool OnRead()
+        {
+            bool result = true;
+            this.Player = GameNetworkMessage.ReadNetworkPeerReferenceFromPacket(ref result, true);
+            return result;
+        }
+
+        protected override void OnWrite()
+        {
+            GameNetworkMessage.WriteNetworkPeerReferenceToPacket(this.Player);
+        }
+    }
+
+
+
+
+
+
 }

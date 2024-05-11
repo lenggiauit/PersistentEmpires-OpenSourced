@@ -10,6 +10,9 @@ namespace PersistentEmpiresLib
 {
     public class ConfigManager
     {
+
+        public static string ModuleId = "DragonVStudio";
+
         public static string XmlFile = "GeneralConfig";
 
         public static int StartingGold { get; private set; }
@@ -25,7 +28,7 @@ namespace PersistentEmpiresLib
         }
         public static bool GetVoiceChatEnabled()
         {
-            string xmlPath = ModuleHelper.GetXmlPath("PersistentEmpires", "Configs/" + XmlFile);
+            string xmlPath = ModuleHelper.GetXmlPath(ModuleId, "Configs/" + XmlFile);
             XmlDocument xmlDocument = new XmlDocument();
             xmlDocument.Load(xmlPath);
             XmlNode portElement = xmlDocument.SelectSingleNode("/GeneralConfig/VoiceChatEnabled");
@@ -34,7 +37,7 @@ namespace PersistentEmpiresLib
 
         public static int GetStartingGold()
         {
-            string xmlPath = ModuleHelper.GetXmlPath("PersistentEmpires", "Configs/" + XmlFile);
+            string xmlPath = ModuleHelper.GetXmlPath(ModuleId, "Configs/" + XmlFile);
             XmlDocument xmlDocument = new XmlDocument();
             xmlDocument.Load(xmlPath);
             XmlNode portElement = xmlDocument.SelectSingleNode("/GeneralConfig/StartingGold");
@@ -51,15 +54,25 @@ namespace PersistentEmpiresLib
 
         public static int GetIntConfig(string config, int defValue)
         {
-            string xmlPath = ModuleHelper.GetXmlPath("PersistentEmpires", "Configs/" + XmlFile);
+            string xmlPath = ModuleHelper.GetXmlPath(ModuleId, "Configs/" + XmlFile);
             XmlDocument xmlDocument = new XmlDocument();
             xmlDocument.Load(xmlPath);
             XmlNode portElement = xmlDocument.SelectSingleNode("/GeneralConfig/" + config);
             return portElement == null ? defValue : int.Parse(portElement.InnerText);
         }
+
+        public static float GetFloatConfig(string config, float defValue)
+        {
+            string xmlPath = ModuleHelper.GetXmlPath(ModuleId, "Configs/" + XmlFile);
+            XmlDocument xmlDocument = new XmlDocument();
+            xmlDocument.Load(xmlPath);
+            XmlNode portElement = xmlDocument.SelectSingleNode("/GeneralConfig/" + config);
+            return portElement == null ? defValue : float.Parse(portElement.InnerText);
+        }
+         
         public static string GetStrConfig(string config, string defValue)
         {
-            string xmlPath = ModuleHelper.GetXmlPath("PersistentEmpires", "Configs/" + XmlFile);
+            string xmlPath = ModuleHelper.GetXmlPath(ModuleId, "Configs/" + XmlFile);
             XmlDocument xmlDocument = new XmlDocument();
             xmlDocument.Load(xmlPath);
             XmlNode portElement = xmlDocument.SelectSingleNode("/GeneralConfig/" + config);

@@ -1,7 +1,10 @@
-﻿using PersistentEmpiresLib.Helpers;
+﻿using PersistentEmpiresLib.Factions;
+using PersistentEmpiresLib.Helpers;
+using PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors;
 using PersistentEmpiresLib.SceneScripts.Interfaces;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -12,6 +15,8 @@ using TaleWorlds.InputSystem;
 using TaleWorlds.Library;
 using TaleWorlds.Localization;
 using TaleWorlds.MountAndBlade;
+using TaleWorlds.MountAndBlade.Objects;
+using TaleWorlds.ObjectSystem;
 
 namespace PersistentEmpiresLib.SceneScripts
 {
@@ -20,7 +25,7 @@ namespace PersistentEmpiresLib.SceneScripts
         // public override ScriptComponentBehavior.TickRequirement GetTickRequirement() => !this.GameEntity.IsVisibleIncludeParents() ? base.GetTickRequirement() : ScriptComponentBehavior.TickRequirement.Tick | ScriptComponentBehavior.TickRequirement.TickParallel;
 
         public bool AttachableToHorse = true;
-        public string AttachableHorseType = "";
+        public string AttachableHorseType = "mule,horse";
         public int StrayDurationSeconds = 7200;
         private long WillBeDeletedAt = 0;
         public string ParticleEffectOnDestroy = "";
@@ -58,45 +63,67 @@ namespace PersistentEmpiresLib.SceneScripts
 
         protected override void OnTick(float dt)
         {
-            if (this.AttachedTo == null) return;
-            if (!this.AttachedTo.IsActive())
+            try
             {
-                this.DetachFromAgentAux();
-                return;
+                if (this.AttachedTo == null) return;
+                if (!this.AttachedTo.IsActive())
+                {
+                    //try
+                    //{
+                    //    NetworkCommunicator player = this.AttachedTo?.MissionPeer.GetNetworkPeer();
+                    //    if (player != null)
+                    //    {
+                    //        PersistentEmpireRepresentative persistentEmpireRepresentative = player.GetComponent<PersistentEmpireRepresentative>();
+                    //        if (persistentEmpireRepresentative != null)
+                    //        {
+                    //            persistentEmpireRepresentative.AttachToAgentId = string.Empty;
+                    //        }
+                    //    }
+                    //}
+                    //catch (Exception ex)
+                    //{
+                    //    Debug.Print("[Error GetNetworkPeer] : " + ex.Message);
+                    //}
+                    this.DetachFromAgentAux();
+                    return;
+                }
+                GameEntity parentEntity = base.GameEntity.Parent;
+
+                MatrixFrame frame = parentEntity.GetGlobalFrame();
+                frame.rotation = this.AttachedTo.Frame.rotation;
+                frame.Rotate(270f * (MBMath.PI / 180), Vec3.Up);
+                parentEntity.SetGlobalFrame(frame);
+
+
+                frame = parentEntity.GetGlobalFrame();
+                Vec3 pointPos = base.GameEntity.GetGlobalFrame().origin;
+                Vec3 agentPos = this.AttachedTo.Position;
+
+                Vec3 moveVector = agentPos - pointPos;
+
+                frame.origin += moveVector;
+                Vec3 normalVector = new Vec3();
+                float terrainZ = 0;
+                base.Scene.GetTerrainHeightAndNormal(frame.origin.AsVec2, out terrainZ, out normalVector);
+
+                if (frame.origin.z <= terrainZ)
+                {
+                    frame.origin.z = terrainZ;
+                    frame.rotation.u = normalVector;
+                    frame.rotation.Orthonormalize();
+                }
+                else
+                {
+                    frame.rotation.u = new Vec3(0, 0, 1);
+                    frame.rotation.Orthonormalize();
+                }
+
+                parentEntity.SetGlobalFrame(frame);
             }
-            GameEntity parentEntity = base.GameEntity.Parent;
-
-            MatrixFrame frame = parentEntity.GetGlobalFrame();
-            frame.rotation = this.AttachedTo.Frame.rotation;
-            frame.Rotate(270f * (MBMath.PI / 180), Vec3.Up);
-            parentEntity.SetGlobalFrame(frame);
-
-
-            frame = parentEntity.GetGlobalFrame();
-            Vec3 pointPos = base.GameEntity.GetGlobalFrame().origin;
-            Vec3 agentPos = this.AttachedTo.Position;
-
-            Vec3 moveVector = agentPos - pointPos;
-
-            frame.origin += moveVector;
-            Vec3 normalVector = new Vec3();
-            float terrainZ = 0;
-            base.Scene.GetTerrainHeightAndNormal(frame.origin.AsVec2, out terrainZ, out normalVector);
-
-            if (frame.origin.z <= terrainZ)
+            catch (Exception ex)
             {
-                frame.origin.z = terrainZ;
-                frame.rotation.u = normalVector;
-                frame.rotation.Orthonormalize();
+                Debug.Print("[ERROR AttachToAgent LOG] " + ex.Message);
             }
-            else
-            {
-                frame.rotation.u = new Vec3(0, 0, 1);
-                frame.rotation.Orthonormalize();
-            }
-
-
-            parentEntity.SetGlobalFrame(frame);
         }
 
         public void ResetStrayDuration()
@@ -107,10 +134,21 @@ namespace PersistentEmpiresLib.SceneScripts
         protected override void OnInit()
         {
             base.OnInit();
-            base.ActionMessage = new TextObject("Attach Object");
-            TextObject descriptionMessage = new TextObject("Press {KEY} To Attach");
-            descriptionMessage.SetTextVariable("KEY", HyperlinkTexts.GetKeyHyperlinkText(HotKeyManager.GetHotKeyId("CombatHotKeyCategory", 13)));
-            base.DescriptionMessage = descriptionMessage;
+
+            if (this.AttachedTo == null)
+            {
+                base.ActionMessage = new TextObject("Attach Object");
+                TextObject descriptionMessage = new TextObject("Press {KEY} To Attach");
+                descriptionMessage.SetTextVariable("KEY", HyperlinkTexts.GetKeyHyperlinkText(HotKeyManager.GetHotKeyId("CombatHotKeyCategory", 13)));
+                base.DescriptionMessage = descriptionMessage;
+            }
+            else
+            {
+                base.ActionMessage = new TextObject("Deattach Object");
+                TextObject descriptionMessage = new TextObject("Press {KEY} To Deattach");
+                descriptionMessage.SetTextVariable("KEY", HyperlinkTexts.GetKeyHyperlinkText(HotKeyManager.GetHotKeyId("CombatHotKeyCategory", 13)));
+                base.DescriptionMessage = descriptionMessage;
+            }
             this.ResetStrayDuration();
             GameEntity parentEntity = base.GameEntity.Parent;
             SynchedMissionObject synchObject = parentEntity.GetFirstScriptOfType<SynchedMissionObject>();
@@ -135,24 +173,63 @@ namespace PersistentEmpiresLib.SceneScripts
         {
             base.OnUse(userAgent);
             Debug.Print("[USING LOG] AGENT USING " + this.GetType().Name);
-            if (this.AttachedTo == null)
-            {
-                if (this.AttachableToHorse)
-                {
-                    if (!userAgent.HasMount) return;
-                    if (this.AttachableHorseType != "" && userAgent.MountAgent.Monster.StringId != this.AttachableHorseType) return;
-                    this.AttachToAgentAux(userAgent.MountAgent);
-                }
-                else
-                {
-                    if (userAgent.HasMount) return;
-                    this.AttachToAgentAux(userAgent);
-                }
-            }
-            else if (this.AttachedTo == userAgent || (userAgent.MountAgent != null && this.AttachedTo == userAgent.MountAgent))
-            {
 
-                this.DetachFromAgentAux();
+            NetworkCommunicator player = userAgent.MissionPeer.GetNetworkPeer();
+            PersistentEmpireRepresentative persistentEmpireRepresentative = player.GetComponent<PersistentEmpireRepresentative>();
+            if (persistentEmpireRepresentative != null)
+            { 
+                if (this.AttachedTo == null)
+                {
+                    if (string.IsNullOrEmpty(persistentEmpireRepresentative.AttachToAgentId))
+                    {
+                        Vec3 currentEnityVecRotationS = userAgent.Frame.rotation.s;
+                        Vec3 enityVecRotationS = this.GameEntity.GetGlobalFrame().rotation.s;
+                        double radians = Math.Acos(Vec3.DotProduct(currentEnityVecRotationS, enityVecRotationS) / (currentEnityVecRotationS.Length) * enityVecRotationS.Length);
+                        double angle = (360 / Math.PI) * radians;
+
+                        // check distance and rotate
+
+                        if (this.GameEntity.GetGlobalFrame().origin.Distance(userAgent.Position) <= 1.2f && angle <= 100)
+                        {
+                            if (this.AttachableToHorse)
+                            {
+                                if (!userAgent.HasMount)
+                                {
+                                    this.AttachToAgentAux(userAgent);
+                                    persistentEmpireRepresentative.AttachToAgentId = this.GameEntity.GetGuid();
+                                }
+                                else
+                                {
+                                    this.AttachToAgentAux(userAgent.MountAgent);
+                                    persistentEmpireRepresentative.AttachToAgentId = this.GameEntity.GetGuid();
+                                }
+
+                            }
+                            else
+                            {
+                                if (!userAgent.HasMount) return;
+                                this.AttachToAgentAux(userAgent);
+                                persistentEmpireRepresentative.AttachToAgentId = this.GameEntity.GetGuid();
+
+                            }
+
+                        }
+                        else
+                        {
+                            InformationComponent.Instance.SendMessage("You are too far from target", new Color(1f, 0, 0).ToUnsignedInteger(), userAgent.MissionPeer.GetNetworkPeer());
+                        }
+                    }
+                    else
+                    {
+                        InformationComponent.Instance.SendMessage("You cannot attach more!", new Color(1f, 0, 0).ToUnsignedInteger(), userAgent.MissionPeer.GetNetworkPeer());
+                    }
+
+                }
+                else if (this.AttachedTo == userAgent || (userAgent.MountAgent != null && this.AttachedTo == userAgent.MountAgent))
+                {
+                    this.DetachFromAgentAux();
+                    persistentEmpireRepresentative.AttachToAgentId = string.Empty;
+                }
             }
         }
 
@@ -164,7 +241,7 @@ namespace PersistentEmpiresLib.SceneScripts
         private void AttachToAgentAux(Agent attachableAgent)
         {
             this.ResetStrayDuration();
-            this.AttachedTo = attachableAgent;
+            this.AttachedTo = attachableAgent; 
         }
 
         public override string GetDescriptionText(GameEntity gameEntity = null)
@@ -183,32 +260,32 @@ namespace PersistentEmpiresLib.SceneScripts
         {
             this.HitPoint = hitPoint;
             MatrixFrame globalFrame = base.GameEntity.GetGlobalFrame();
-            /*if (this.HitPoint > this.MaxHitPoint) this.HitPoint = this.MaxHitPoint;
-            if (this.HitPoint < 0) this.HitPoint = 0;
+            //if (this.HitPoint > this.MaxHitPoint) this.HitPoint = this.MaxHitPoint;
+            //if (this.HitPoint < 0) this.HitPoint = 0;
 
-            if (this.HitPoint == 0)
-            {
-                if (this.AttachedTo != null)
-                {
-                    this.AttachedTo = null;
-                }
-                if (this.ParticleEffectOnDestroy != "")
-                {
-                    Mission.Current.Scene.CreateBurstParticle(ParticleSystemManager.GetRuntimeIdByName(this.ParticleEffectOnDestroy), globalFrame);
-                }
-                if (this.SoundEffectOnDestroy != "")
-                {
-                    Mission.Current.MakeSound(SoundEvent.GetEventIdFromString(this.SoundEffectOnDestroy), globalFrame.origin, false, true, -1, -1);
-                }
-                if(base.GameEntity.Parent != null)
-                {
-                    base.GameEntity.Parent.Remove(0);
-                }
-                else
-                {
-                    base.GameEntity.Remove(0);
-                }
-            }*/
+            //if (this.HitPoint == 0)
+            //{
+            //    if (this.AttachedTo != null)
+            //    {
+            //        this.AttachedTo = null;
+            //    }
+            //    if (this.ParticleEffectOnDestroy != "")
+            //    {
+            //        Mission.Current.Scene.CreateBurstParticle(ParticleSystemManager.GetRuntimeIdByName(this.ParticleEffectOnDestroy), globalFrame);
+            //    }
+            //    if (this.SoundEffectOnDestroy != "")
+            //    {
+            //        Mission.Current.MakeSound(SoundEvent.GetEventIdFromString(this.SoundEffectOnDestroy), globalFrame.origin, false, true, -1, -1);
+            //    }
+            //    if (base.GameEntity.Parent != null)
+            //    {
+            //        base.GameEntity.Parent.Remove(0);
+            //    }
+            //    else
+            //    {
+            //        base.GameEntity.Remove(0);
+            //    }
+            //}
         }
 
         protected override bool OnHit(Agent attackerAgent, int damage, Vec3 impactPosition, Vec3 impactDirection, in MissionWeapon weapon, ScriptComponentBehavior attackerScriptComponentBehavior, out bool reportDamage)
@@ -224,6 +301,7 @@ namespace PersistentEmpiresLib.SceneScripts
             }
 
             return false;
-        }
+        } 
+
     }
 }

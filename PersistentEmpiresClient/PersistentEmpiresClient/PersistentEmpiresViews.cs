@@ -13,12 +13,12 @@ namespace PersistentEmpires.Views
     [ViewCreatorModule]
     public class PersistentEmpireViews
     {
-        [ViewMethod("PersistentEmpires")]
+        [ViewMethod("DragonVStudio")]
         public static MissionView[] OpenPersistentEmpires(Mission mission)
         {
             List<MissionView> list = new List<MissionView>();
             list.Add(MultiplayerViewCreator.CreateMissionServerStatusUIHandler());
-            list.Add(new PEEscapeMenu("Persistent Empires"));
+            list.Add(new PEEscapeMenu("Dragon V Studio"));
             list.Add(ViewCreator.CreateOptionsUIHandler());
             list.Add(ViewCreator.CreateMissionBoundaryCrossingView());
             list.Add(ViewCreator.CreateMissionMainAgentEquipDropView(mission));
@@ -27,6 +27,7 @@ namespace PersistentEmpires.Views
             list.Add(new PERangedSiegeWeaponViewController());
             list.Add(new PEAgentLabelUIHandler());
             list.Add(new PEConsumeFoodView());
+            list.Add(new PEDragonVItemView());
             list.Add(new PEAgentStatusView());
             list.Add(new PEFactionKickPlayer());
             list.Add(new MissionBoundaryWallView());
@@ -74,6 +75,7 @@ namespace PersistentEmpires.Views
             // list.Add(new SentryMissionView());
             list.Add(MultiplayerViewCreator.CreateMultiplayerMissionDeathCardUIHandler(null));
             list.Add(new DVSDiscordRoleView());
+            list.Add(new PEShipCanonViewController());
 
             return list.ToArray();
         }

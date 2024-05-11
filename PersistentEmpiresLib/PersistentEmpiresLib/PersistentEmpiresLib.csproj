@@ -150,6 +150,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Helpers\CountDownTimer.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="ConfigManage.cs" />
     <Compile Include="Database\DBEntities\DBBanRecord.cs" />

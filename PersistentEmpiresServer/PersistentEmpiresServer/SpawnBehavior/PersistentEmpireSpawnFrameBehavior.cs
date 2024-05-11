@@ -147,6 +147,7 @@ namespace PersistentEmpiresServer.SpawnBehavior
                         v = spawnFrame.rotation.f.AsVec2;
                         agentBuildData.InitialDirection(v);
                         Agent agent = this.Mission.SpawnAgent(agentBuildData, WoundingBehavior.Instance.WoundingEnabled ? false : true);
+                          
                         Agent mountAgent = agent.MountAgent;
 
                         LoggerHelper.LogAnAction(networkCommunicator, LogAction.PlayerSpawn, null, new object[] { agent });

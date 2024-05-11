@@ -88,7 +88,7 @@ namespace PersistentEmpiresLib.SceneScripts
         
         public static int MAX_STOCK_COUNT = 1000;
         public string XmlFile = "examplemarket"; // itemId*minimum*maximum,itemId*minimum*maximum
-        public string ModuleFolder = "PersistentEmpires";
+        public string ModuleFolder = ConfigManager.ModuleId;
         protected override bool LockUserFrames
         {
             get
@@ -149,7 +149,11 @@ namespace PersistentEmpiresLib.SceneScripts
             base.DescriptionMessage = descriptionMessage;
             this.stockpileMarketComponent = Mission.Current.GetMissionBehavior<StockpileMarketComponent>();
             Debug.Print("Initiating Stockpile Market With " + this.ModuleFolder + " Module");
-            string xmlPath = ModuleHelper.GetXmlPath(this.ModuleFolder, "Markets/" + this.XmlFile);
+            ///string xmlPath = ModuleHelper.GetXmlPath(this.ModuleFolder, "Markets/" + this.XmlFile);
+            ///
+            // temp set
+            string xmlPath = ModuleHelper.GetXmlPath("DragonVStudio", "Markets/" + this.XmlFile);
+
             XmlDocument xmlDocument = new XmlDocument();
             xmlDocument.Load(xmlPath);
             this.MarketItems = new List<MarketItem>();

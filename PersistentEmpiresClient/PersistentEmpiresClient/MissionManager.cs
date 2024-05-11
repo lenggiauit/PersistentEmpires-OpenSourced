@@ -1,4 +1,5 @@
 ﻿using PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors;
+using PersistentEmpiresMission.MissionBehaviors;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,7 @@ namespace PersistentEmpiresClient
         [MissionMethod]
         public static void OpenPersistentEmpires(string scene)
         {
-            MissionState.OpenNew("PersistentEmpires", new MissionInitializerRecord(scene), delegate (Mission missionController)
+            MissionState.OpenNew("DragonVStudio", new MissionInitializerRecord(scene), delegate (Mission missionController)
             {
                 return new MissionBehavior[]
                 {
@@ -49,10 +50,16 @@ namespace PersistentEmpiresClient
                     new PatreonRegistryBehavior(),
                     new TradingCenterBehavior(),
                     new DayNightCycleBehavior(),
+                    new DragonVItemBehavior(),
                     new InstrumentsBehavior(),
                     new MoneyChestBehavior(),
-                    new DecapitationBehavior(),
-                    new AnimationBehavior(),                    
+                    //new DecapitationBehavior(),
+                    new AnimationBehavior(),  
+                    //new AgentCommonAILogic(),
+                    //new AgentHumanAILogic(), 
+                    
+                    
+
                 };
             },true,true);
         }

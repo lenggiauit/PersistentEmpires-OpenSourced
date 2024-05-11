@@ -48,7 +48,7 @@ namespace PersistentEmpiresLib.SceneScripts
     public class PE_CraftingStation : PE_UsableFromDistance
     {
         public string StationName = "Carpenter Bench";
-        public string ModuleFolder = "PersistentEmpires";
+        public string ModuleFolder = ConfigManager.ModuleId;
         public CraftingComponent craftingComponent { get; private set; }
         public PE_UpgradeableBuildings upgradeableBuilding { get; private set; }
         private PlayerInventoryComponent playerInventoryComponent;
@@ -109,7 +109,11 @@ namespace PersistentEmpiresLib.SceneScripts
             }
             else
             {
-                string xmlPath = ModuleHelper.GetXmlPath(this.ModuleFolder, "CraftingRecipies/"+this.CraftingRecieptTag);
+                //string xmlPath = ModuleHelper.GetXmlPath(this.ModuleFolder, "CraftingRecipies/"+this.CraftingRecieptTag);
+
+                // temp set
+                string xmlPath = ModuleHelper.GetXmlPath("DragonVStudio", "CraftingRecipies/" + this.CraftingRecieptTag);
+
                 XmlDocument xmlDocument = new XmlDocument();
                 xmlDocument.Load(xmlPath);
                 foreach (XmlNode node in xmlDocument.DocumentElement.ChildNodes) {
