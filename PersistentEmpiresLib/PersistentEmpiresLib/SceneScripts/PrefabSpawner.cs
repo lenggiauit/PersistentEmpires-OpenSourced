@@ -22,20 +22,20 @@ namespace PersistentEmpiresLib.SceneScripts
         public ItemObject SpawnerItem;
         public int MaxSpawnAmount;
         public float DespawnArea;
-        public float AdjPointX;
-        public float AdjPointY;
-        public float AdjPointZ;
+        public float AdjustPositionX;
+        public float AdjustPositionY;
+        public float AdjustPositionZ;
 
 
-        public SpawnableItem(string prefabName, string spawnerItemId, int maxSpawnAmount, float despawnArea, float adjPointX, float adjPointY, float adjPointZ)
+        public SpawnableItem(string prefabName, string spawnerItemId, int maxSpawnAmount, float despawnArea, float adjustPositionX, float adjustPositionY, float adjustPositionZ)
         {
             this.PrefabName = prefabName;
             this.SpawnerItem = MBObjectManager.Instance.GetObject<ItemObject>(spawnerItemId);
             this.MaxSpawnAmount = maxSpawnAmount;
-            DespawnArea = despawnArea;
-            this.AdjPointX = adjPointX;
-            this.AdjPointY = adjPointY;
-            this.AdjPointZ = adjPointZ;
+            this.DespawnArea = despawnArea;
+            this.AdjustPositionX = adjustPositionX;
+            this.AdjustPositionY = adjustPositionY;
+            this.AdjustPositionZ = adjustPositionZ;
         }
     }
     public class PE_PrefabSpawner : PE_UsableFromDistance
@@ -83,11 +83,11 @@ namespace PersistentEmpiresLib.SceneScripts
                 int maxSpawnAmount = node["MaxSpawnAmount"] != null ? int.Parse(node["MaxSpawnAmount"].InnerText) : 20;
                 float despawnArea = node["DespawnArea"] != null ? int.Parse(node["DespawnArea"].InnerText) : 5f;
 
-                float adjPointX = node["AdjPointX"] != null ? float.Parse(node["AdjPointX"].InnerText) : 0;
-                float adjPointY = node["AdjPointY"] != null ? float.Parse(node["AdjPointY"].InnerText) : 0;
-                float adjPointZ = node["AdjPointZ"] != null ? float.Parse(node["AdjPointZ"].InnerText) : 0;
+                float adjustPositionX = node["AdjustPositionX"] != null ? float.Parse(node["AdjustPositionX"].InnerText) : 0;
+                float adjustPositionY = node["AdjustPositionY"] != null ? float.Parse(node["AdjustPositionY"].InnerText) : 0;
+                float adjustPositionZ = node["AdjustPositionZ"] != null ? float.Parse(node["AdjustPositionZ"].InnerText) : 0;
 
-                SpawnableItem spawnableItem = new SpawnableItem(prefabName, itemId, maxSpawnAmount, despawnArea, adjPointX, adjPointY, adjPointZ);
+                SpawnableItem spawnableItem = new SpawnableItem(prefabName, itemId, maxSpawnAmount, despawnArea, adjustPositionX, adjustPositionY, adjustPositionZ);
                 if (spawnableItem.SpawnerItem != null)
                 {
                     this.SpawnableItems.Add(spawnableItem);
@@ -155,7 +155,7 @@ namespace PersistentEmpiresLib.SceneScripts
             userAgent.RemoveEquippedWeapon(equipmentIndex);
              
             MatrixFrame spawnFrame = this.SpawningPoint.GetGlobalFrame(); 
-            Vec3 vecspawnFrame = new Vec3(spawnFrame.origin.X + spawnableItem.AdjPointX, spawnFrame.origin.Y + spawnableItem.AdjPointY, spawnFrame.origin.Z + spawnableItem.AdjPointZ);
+            Vec3 vecspawnFrame = new Vec3(spawnFrame.origin.X + spawnableItem.AdjustPositionX, spawnFrame.origin.Y + spawnableItem.AdjustPositionY, spawnFrame.origin.Z + spawnableItem.AdjustPositionZ);
 
             MatrixFrame adjSpawnFrame = new MatrixFrame(spawnFrame.rotation, vecspawnFrame);
              
@@ -210,15 +210,9 @@ namespace PersistentEmpiresLib.SceneScripts
                 SpawnableItem sItem = this.SpawnableItems.FirstOrDefault(s => s.PrefabName == spawnedEntity.Name);
                 if (sItem.SpawnerItem != null)
                 {
-                    float distance = spawnedEntityOrigin.Distance(spawnerOrigin);
-                   // InformationComponent.Instance.SendMessage("Distance: " + distance, new Color(1f, 0, 0).ToUnsignedInteger(), userAgent.MissionPeer.GetNetworkPeer());
-                   // InformationComponent.Instance.SendMessage("DespawnArea: " + sItem.DespawnArea, new Color(1f, 0, 0).ToUnsignedInteger(), userAgent.MissionPeer.GetNetworkPeer());
+                    float distance = spawnedEntityOrigin.Distance(spawnerOrigin); 
                     if (distance <= sItem.DespawnArea)
-                    {
-                        // InformationComponent.Instance.SendMessage("Distance: " + distance, new Color(1f, 0, 0).ToUnsignedInteger(), userAgent.MissionPeer.GetNetworkPeer());
-                        // InformationComponent.Instance.SendMessage("DespawnArea: " + sItem.DespawnArea, new Color(1f, 0, 0).ToUnsignedInteger(), userAgent.MissionPeer.GetNetworkPeer());
-                        // Remove the object add it as to the agent's inventory, if no place drop on ground.
-                        // userAgent.Equipment
+                    { 
                         NetworkCommunicator peer = userAgent.MissionPeer.GetNetworkPeer();
                         PersistentEmpireRepresentative empireRepresentative = peer.GetComponent<PersistentEmpireRepresentative>();
                         if (empireRepresentative.GetInventory().HasEnoughRoomFor(sItem.SpawnerItem, 1))
