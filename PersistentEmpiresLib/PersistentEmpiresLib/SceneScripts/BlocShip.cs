@@ -14,7 +14,9 @@ using TaleWorlds.Library;
 using TaleWorlds.Localization;
 using TaleWorlds.MountAndBlade;
 using TaleWorlds.ObjectSystem;
+using Debug = TaleWorlds.Library.Debug;
 using Timer = TaleWorlds.Core.Timer;
+using Utilities = PersistentEmpiresLib.Helpers.Utilities;
 
 namespace PersistentEmpiresLib.SceneScripts
 {
@@ -24,16 +26,12 @@ namespace PersistentEmpiresLib.SceneScripts
         private Timer timerDestroyShip = null;
         CountDownTimer countDownTimer = null;
         private float timerDestroyShipGameTime = 0;
-        private int timerDestroyShipDuration = 20;
-
-        // Credits to fucking Bloc
+        private int timerDestroyShipDuration = 20;  
         public bool isPlayerUsing = false;
         public string Animation = "";
-        public int StrayDurationSeconds = 7200;
-
+        public int StrayDurationSeconds = 7200; 
         public string RidingSkillId = "";
-        public int RidingSkillRequired = 0;
-
+        public int RidingSkillRequired = 0; 
         public string RepairingSkillId = "";
         public int RepairingSkillRequired = 0;
 
@@ -45,7 +43,7 @@ namespace PersistentEmpiresLib.SceneScripts
         public string ParticleEffectOnRepair = "";
         public string SoundEffectOnRepair = "";
         public bool DestroyedByStoneOnly = false;
-
+        public string CollisionCheckPointTag = "collision_check_point";
         private long WillBeDeletedAt = 0;
         private SkillObject RidingSkill;
         private SkillObject RepairSkill;
@@ -69,7 +67,7 @@ namespace PersistentEmpiresLib.SceneScripts
         private const string shipwc = "pe_shipwc";
         private const string mediumShip = "pe_ship1";
         private const string smallShip = "pe_ship_e";
-        private string CollisionCheckPointTag = "collision_check_point";
+        
 
         // public Timer DestroySpawnTimer;
 
@@ -250,19 +248,16 @@ namespace PersistentEmpiresLib.SceneScripts
 
             listEntity = listEntity.Where(e => entityOrigin.Distance(e.GetGlobalFrame().origin) <= 20 && e != this.GameEntity).ToList();
 
-            List<Vec3> currentEntityCheckPointList = GetCollisionCheckPoints(this.GameEntity);
+            List<Vec3> currentEntityCheckPointList = Utilities.GetCollisionCheckPoints(this.GameEntity, CollisionCheckPointTag);
 
             if (listEntity.Count > 0)
             {
                 if (this.PilotAgent != null)
-                {
-                    NetworkCommunicator player = this.PilotAgent.MissionPeer.GetNetworkPeer();
-                    PersistentEmpireRepresentative persistentEmpireRepresentative = player.GetComponent<PersistentEmpireRepresentative>();
-
+                {  
                     foreach (GameEntity entity in listEntity)
                     {
 
-                        List<Vec3> entityCheckPointList = GetCollisionCheckPoints(entity);
+                        List<Vec3> entityCheckPointList = Utilities.GetCollisionCheckPoints(entity, CollisionCheckPointTag);
 
                         if (Helpers.Utilities.HasClosestToDistanceAsVec3(currentEntityCheckPointList, entityCheckPointList, defaultShipCollisionDistance))
                         {
@@ -444,74 +439,14 @@ namespace PersistentEmpiresLib.SceneScripts
                    base.GameEntity.Remove(0);
                    destroyed = false;
 
-                    //if (this.GameEntity.Name.Equals(specialShip1) || this.GameEntity.Name.Equals(specialShip2))
-                    //{
-                    //    //base.GameEntity.EntityFlags = EntityFlags.ForceAsStatic;
-                    //    //destroyed = false;
-                    //    if (this.DestroySpawnTimer.Check(Mission.Current.CurrentTime))
-                    //    {
-                    //        base.GameEntity.Remove(0);
-                    //        destroyed = false;
-                    //        this.DestroySpawnTimer.Reset(Mission.Current.CurrentTime, DestroyDuration);
-                    //    }
-                    //    else
-                    //    {
-                    //        base.GameEntity.EntityFlags = EntityFlags.ForceAsStatic;
-                    //        //if (this.PilotAgent != null)
-                    //        //{
-                    //        //    NetworkCommunicator player = this.PilotAgent.MissionPeer.GetNetworkPeer();
-                    //        //    PersistentEmpireRepresentative persistentEmpireRepresentative = player.GetComponent<PersistentEmpireRepresentative>();
-                    //        //    InformationComponent.Instance.SendMessage("Ship will be destroy after:  " + this.DestroySpawnTimer.ElapsedTime(), new Color(1f, 0, 0).ToUnsignedInteger(), persistentEmpireRepresentative.MissionPeer.GetNetworkPeer());
-
-                    //        //}
-                    //    }
-
-                    //}
-                    //else
-                    //{
-                    //    //base.GameEntity.Remove(0);
-                    //    //destroyed = false;
-                    //    if (this.DestroySpawnTimer.Check(Mission.Current.CurrentTime))
-                    //    {
-                    //        base.GameEntity.Remove(0);
-                    //        destroyed = false;
-                    //        this.DestroySpawnTimer.Reset(Mission.Current.CurrentTime, DestroyDuration);
-                    //    }
-                    //    else
-                    //    {
-                    //        base.GameEntity.EntityFlags = EntityFlags.ForceAsStatic;
-                    //        //if (this.PilotAgent != null)
-                    //        //{
-                    //        //    NetworkCommunicator player = this.PilotAgent.MissionPeer.GetNetworkPeer();
-                    //        //    PersistentEmpireRepresentative persistentEmpireRepresentative = player.GetComponent<PersistentEmpireRepresentative>();
-                    //        //    InformationComponent.Instance.SendMessage("Ship will be destroy after:  " + this.DestroySpawnTimer.ElapsedTime(), new Color(1f, 0, 0).ToUnsignedInteger(), persistentEmpireRepresentative.MissionPeer.GetNetworkPeer());
-
-                    //        //}
-                    //    }
-                    //}
+                    
                 }
             }
-            catch (Exception e) {
-
-               // LoggerHelper.LogAnAction ("Error",  "Error", null, new object[] { this.GetType().Name + " - Message:" + e.Message });
-
+            catch (Exception ex) { 
+                Debug.Print("[ERROR BlocShip OnTick LOG] " + ex.Message); 
             }
         }
-
-
-        private List<Vec3> GetCollisionCheckPoints(GameEntity gameEntity)
-        {
-            List<Vec3> list = new List<Vec3>();
-            foreach (var cp in gameEntity.GetChildren().Where(c => c.HasTag(CollisionCheckPointTag)))
-            {
-                list.Add(cp.GetGlobalFrame().origin);
-            }
-            return list;
-        }
-
-
-
-
+         
         protected override void OnTickParallel(float dt)
         {
             base.OnTickParallel(dt);

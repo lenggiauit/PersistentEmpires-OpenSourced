@@ -1,11 +1,11 @@
 ﻿using PersistentEmpiresLib.Helpers;
-using PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors; 
+using PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors;
 using PersistentEmpiresLib.SceneScripts.Extensions;
 using PersistentEmpiresLib.SceneScripts.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq; 
+using System.Linq;
 using TaleWorlds.Core;
 using TaleWorlds.Engine;
 using TaleWorlds.InputSystem;
@@ -15,6 +15,7 @@ using TaleWorlds.MountAndBlade;
 using TaleWorlds.ObjectSystem;
 using Debug = TaleWorlds.Library.Debug;
 using PersistentEmpiresLib.Factions;
+using Utilities = PersistentEmpiresLib.Helpers.Utilities;
 
 namespace PersistentEmpiresLib.SceneScripts
 {
@@ -51,7 +52,7 @@ namespace PersistentEmpiresLib.SceneScripts
         public string RepairItem = "pe_buildhammer";
         public string ParticleEffectOnDestroy = "psys_game_wooden_merlon_destruction";
         public string SoundEffectOnDestroy = "";
-
+        public string CollisionCheckPointTag = "collision_check_point";
         public string ParticleEffectOnRepair = "";
         public string SoundEffectOnRepair = "";
         public bool DestroyedByStoneOnly = false;
@@ -73,24 +74,13 @@ namespace PersistentEmpiresLib.SceneScripts
         private List<RepairReceipt> receipt = new List<RepairReceipt>();
         private bool _landed;
         private bool destroyed = false;
-
-
-        private float defaultShipCollisionDistance = 0.1f;
-        /* horizontal  semiaxis */
-        private float defaultAdjustShipHS = 2;
-        /* vertical semiaxis */
-        private float defaultAdjustShipVS = 3;
-
+        private float defaultShipCollisionDistance = 0.1f; 
         protected bool IsShootSideInLeft { get; set; }
-
         protected float CurrentShootAngle { get; set; }
         protected float CurrentShootLeftRightAngle { get; set; }
         protected float CurrentShootTopLeftAngle { get; set; }
 
-        private string CollisionCheckPointTag = "collision_check_point";
-
         private bool isHitting = false;
-
         MatrixFrame canonFrame;
 
         private Faction CurrentFaction { get; set; }
@@ -135,17 +125,7 @@ namespace PersistentEmpiresLib.SceneScripts
         {
             return this.ShipAlwaysAlignToTerritory;
         }
-
-        private List<Vec3> GetCollisionCheckPoints(GameEntity gameEntity)
-        {
-            List<Vec3> list = new List<Vec3>();
-            foreach (var cp in gameEntity.GetChildren().Where(c => c.HasTag(CollisionCheckPointTag)))
-            {
-                list.Add(cp.GetGlobalFrame().origin);
-            }
-            return list;
-        }
-
+         
         private void ParseRepairReceipts()
         {
             string[] repairReceipt = this.RepairItemRecipies.Split(',');
@@ -214,19 +194,15 @@ namespace PersistentEmpiresLib.SceneScripts
 
             listEntity = listEntity.Where(e => entityOrigin.Distance(e.GetGlobalFrame().origin) <= 20 && e != this.GameEntity).ToList();
 
-            List<Vec3> currentEntityCheckPointList = GetCollisionCheckPoints(this.GameEntity);
+            List<Vec3> currentEntityCheckPointList = Utilities.GetCollisionCheckPoints(this.GameEntity, CollisionCheckPointTag);
 
             if (listEntity.Count > 0)
             {
                 if (this.GetPilotAgent() != null)
-                {
-                    NetworkCommunicator player = this.GetPilotAgent().MissionPeer.GetNetworkPeer();
-                    PersistentEmpireRepresentative persistentEmpireRepresentative = player.GetComponent<PersistentEmpireRepresentative>();
-
+                { 
                     foreach (GameEntity entity in listEntity)
-                    {
-
-                        List<Vec3> entityCheckPointList = GetCollisionCheckPoints(entity);
+                    { 
+                        List<Vec3> entityCheckPointList = Utilities.GetCollisionCheckPoints(entity, CollisionCheckPointTag);
 
                         if (Helpers.Utilities.HasClosestToDistanceAsVec3(currentEntityCheckPointList, entityCheckPointList, defaultShipCollisionDistance))
                         {
@@ -264,9 +240,7 @@ namespace PersistentEmpiresLib.SceneScripts
                             this.isHitting = true;
                             break;
 
-                        }
-
-
+                        } 
                     }
                 }
 
@@ -662,7 +636,7 @@ namespace PersistentEmpiresLib.SceneScripts
                         this.CurrentFaction = persistentEmpireRepresentative.GetFaction();
                         UpdateBannerFromFaction();
                     }
-                } 
+                }
 
                 if (GameNetwork.IsServer)
                 {
@@ -930,7 +904,7 @@ namespace PersistentEmpiresLib.SceneScripts
             }
             catch (Exception e)
             {
-                Debug.Print("[ERROR LOG] " + e.Message);
+                Debug.Print("[ERROR PE_ShipCannon LOG] " + e.Message);
             }
         }
 
@@ -1085,7 +1059,7 @@ namespace PersistentEmpiresLib.SceneScripts
                 base.HasAmmo = value;
             }
         }
-         
+
 
         // Token: 0x06002CD3 RID: 11475 RVA: 0x000B0DC8 File Offset: 0x000AEFC8
         protected override void ApplyAimChange()
@@ -1397,9 +1371,10 @@ namespace PersistentEmpiresLib.SceneScripts
                 }
                 return false;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 reportDamage = false;
+                Debug.Print("[ERROR WARSHIP OnHit LOG] " + ex.Message);
                 return false;
             }
 

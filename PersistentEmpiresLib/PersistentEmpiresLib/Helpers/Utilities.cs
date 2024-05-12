@@ -76,7 +76,17 @@ namespace PersistentEmpiresLib.Helpers
             return found; 
         }
 
-        private static float GetDistanceByAngle(Vec3 centerPoint, float hs, float vs, double t_rad)
+        public static List<Vec3> GetCollisionCheckPoints(GameEntity gameEntity, string collisionCheckPointTag)
+        {
+            List<Vec3> list = new List<Vec3>();
+            foreach (var cp in gameEntity.GetChildren().Where(c => c.HasTag(collisionCheckPointTag)))
+            {
+                list.Add(cp.GetGlobalFrame().origin);
+            }
+            return list;
+        }
+
+        public static float GetDistanceByAngle(Vec3 centerPoint, float hs, float vs, double t_rad)
         {
             float x = centerPoint.X + (hs * (float)Math.Cos(t_rad));
             float y = centerPoint.Y + (vs * (float)Math.Sin(t_rad));
@@ -85,7 +95,7 @@ namespace PersistentEmpiresLib.Helpers
             return centerPoint.Distance(newVecByAngle);
         }
 
-        private static Vec3 GetCollisonPointByAngle(Vec3 centerPoint, float hs, float vs, double t_rad)
+        public static Vec3 GetCollisonPointByAngle(Vec3 centerPoint, float hs, float vs, double t_rad)
         {
             float x = centerPoint.X + (hs * (float)Math.Cos(t_rad));
             float y = centerPoint.Y + (vs * (float)Math.Sin(t_rad));
@@ -93,7 +103,7 @@ namespace PersistentEmpiresLib.Helpers
             return new Vec3(x, y, z);
         }
 
-        private static double GetRadian(GameEntity e1, GameEntity e2)
+        public static double GetRadian(GameEntity e1, GameEntity e2)
         {
             Vec3 currentEnityVecRotationS = e1.GetGlobalFrame().rotation.s;
             Vec3 enityVecRotationS = e2.GetGlobalFrame().rotation.s;

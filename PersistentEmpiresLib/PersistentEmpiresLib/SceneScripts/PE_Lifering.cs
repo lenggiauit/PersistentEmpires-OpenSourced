@@ -9,7 +9,8 @@ using TaleWorlds.Engine;
 using TaleWorlds.InputSystem;
 using TaleWorlds.Library;
 using TaleWorlds.Localization;
-using TaleWorlds.MountAndBlade;  
+using TaleWorlds.MountAndBlade;
+using Utilities = PersistentEmpiresLib.Helpers.Utilities;
 
 namespace PersistentEmpiresLib.SceneScripts
 {
@@ -17,25 +18,19 @@ namespace PersistentEmpiresLib.SceneScripts
     {   
         public bool isPlayerUsing = false;
         public string Animation = "";
-        public int StrayDurationSeconds = 7200;  
-       
-        public string ParticleEffectOnDestroy = "psys_game_wooden_merlon_destruction";
-
-        public string ParticleEffectOnWater = "psys_game_water_splash_2";
-
-
+        public int StrayDurationSeconds = 7200;   
+        public string ParticleEffectOnDestroy = "psys_game_wooden_merlon_destruction"; 
+        public string ParticleEffectOnWater = "psys_game_water_splash_2"; 
         public string SoundEffectOnDestroy = "";
         public string ParticleEffectOnRepair = "";
         public string SoundEffectOnRepair = "";
-        public bool DestroyedByStoneOnly = false;
-
-        private long WillBeDeletedAt = 0;
-        private SkillObject RidingSkill; 
+        public string CollisionCheckPointTag = "collision_check_point";
+        public bool DestroyedByStoneOnly = false; 
+        private long WillBeDeletedAt = 0; 
         private bool destroyed = false;
         private float defaultShipCollisionDistance = 0.1f;
         private bool isHitting = false;
-        private string CollisionCheckPointTag = "collision_check_point";
-        private float currentPositionZ = 0;
+        
         private float waterLevelAdj = ConfigManager.GetFloatConfig("WaterLevelAdj", 0.5f);
 
         private bool CheckCanElevate()
@@ -51,8 +46,7 @@ namespace PersistentEmpiresLib.SceneScripts
         }
 
         public override ScriptComponentBehavior.TickRequirement GetTickRequirement() => !this.GameEntity.IsVisibleIncludeParents() ? base.GetTickRequirement() : ScriptComponentBehavior.TickRequirement.Tick | ScriptComponentBehavior.TickRequirement.TickParallel;
-
-          
+         
         private void CheckInTheWater(MatrixFrame oldFrame) 
         {
             if (base.GameEntity == null) return;
@@ -72,8 +66,7 @@ namespace PersistentEmpiresLib.SceneScripts
             }
             CanElevate = CheckCanElevate();
         }
-          
-    
+           
         private void checkHittingObject(MatrixFrame oldFrame)
         {
 
@@ -82,27 +75,19 @@ namespace PersistentEmpiresLib.SceneScripts
 
             List<GameEntity> listEntity = new List<GameEntity>();
             Vec3 entityOrigin = this.GameEntity.GetGlobalFrame().origin;
-            Mission.Current.Scene.GetAllEntitiesWithScriptComponent<PE_BlocShip>(ref listEntity);
-            List<GameEntity> listEntity2 = new List<GameEntity>();
-            Mission.Current.Scene.GetAllEntitiesWithScriptComponent<PE_ShipCannon>(ref listEntity2);
-            listEntity.AddRange(listEntity2);
+            Mission.Current.Scene.GetAllEntitiesWithScriptComponent<PE_Lifering>(ref listEntity); 
 
             listEntity = listEntity.Where(e => entityOrigin.Distance(e.GetGlobalFrame().origin) <= 20 && e != this.GameEntity).ToList();
 
-            List<Vec3> currentEntityCheckPointList = GetCollisionCheckPoints(this.GameEntity);
+            List<Vec3> currentEntityCheckPointList = Utilities.GetCollisionCheckPoints(this.GameEntity, CollisionCheckPointTag);
 
             if (listEntity.Count > 0)
             {
                 if (this.PilotAgent != null)
-                {
-                    NetworkCommunicator player = this.PilotAgent.MissionPeer.GetNetworkPeer();
-                    PersistentEmpireRepresentative persistentEmpireRepresentative = player.GetComponent<PersistentEmpireRepresentative>();
-
+                {  
                     foreach (GameEntity entity in listEntity)
-                    {
-
-                        List<Vec3> entityCheckPointList = GetCollisionCheckPoints(entity);
-
+                    { 
+                        List<Vec3> entityCheckPointList = Utilities.GetCollisionCheckPoints(entity, CollisionCheckPointTag); 
                         if (Helpers.Utilities.HasClosestToDistanceAsVec3(currentEntityCheckPointList, entityCheckPointList, defaultShipCollisionDistance))
                         {
                             if (this.IsMovingBackward)
@@ -274,10 +259,9 @@ namespace PersistentEmpiresLib.SceneScripts
                     destroyed = false; 
                 }
             }
-            catch (Exception e)
+            catch (Exception ex)
             { 
-                // LoggerHelper.LogAnAction ("Error",  "Error", null, new object[] { this.GetType().Name + " - Message:" + e.Message });
-
+                Debug.PrintError(string.Format("[ERROR PE_Lifering]: {0}", ex.Message));  
             }
         }
 
@@ -298,17 +282,6 @@ namespace PersistentEmpiresLib.SceneScripts
                     tail.PauseParticleSystem(true);
                 }
             }
-        }
-
-
-        private List<Vec3> GetCollisionCheckPoints(GameEntity gameEntity)
-        {
-            List<Vec3> list = new List<Vec3>();
-            foreach (var cp in gameEntity.GetChildren().Where(c => c.HasTag(CollisionCheckPointTag)))
-            {
-                list.Add(cp.GetGlobalFrame().origin);
-            }
-            return list;
         }
          
 
