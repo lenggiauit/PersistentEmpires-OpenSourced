@@ -35,7 +35,7 @@ namespace PersistentEmpiresLib
         public Vec3 LoadedDbPosition;
         public Equipment LoadedSpawnEquipment;
 
-        public string AttachToAgentId {  get; set; } 
+        public PE_AttachToAgent AttachToAgent {  get; set; } 
 
         public int[] LoadedAmmo { get; set; }
 

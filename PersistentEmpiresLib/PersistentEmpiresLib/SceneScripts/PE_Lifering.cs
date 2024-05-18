@@ -66,7 +66,8 @@ namespace PersistentEmpiresLib.SceneScripts
             }
             CanElevate = CheckCanElevate();
         }
-           
+         
+
         private void checkHittingObject(MatrixFrame oldFrame)
         {
 
@@ -88,7 +89,7 @@ namespace PersistentEmpiresLib.SceneScripts
                     foreach (GameEntity entity in listEntity)
                     { 
                         List<Vec3> entityCheckPointList = Utilities.GetCollisionCheckPoints(entity, CollisionCheckPointTag); 
-                        if (Helpers.Utilities.HasClosestToDistanceAsVec3(currentEntityCheckPointList, entityCheckPointList, defaultShipCollisionDistance))
+                        if (Helpers.Utilities.HasClosestToDistanceAsVec2(currentEntityCheckPointList, entityCheckPointList, defaultShipCollisionDistance))
                         {
                             if (this.IsMovingBackward)
                             {

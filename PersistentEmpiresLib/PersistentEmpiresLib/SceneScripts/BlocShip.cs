@@ -107,7 +107,7 @@ namespace PersistentEmpiresLib.SceneScripts
                 if (base.IsMovingUp) this.StopMovingUp();
                 if (base.IsTurningLeft) this.StopTurningLeft();
                 if (base.IsTurningRight) this.StopTurningRight();
-                base.GameEntity.SetFrame(ref oldFrame);
+                base.GameEntity.SetGlobalFrame(oldFrame);
                 // this._landed = true;
                 Mission.Current.MakeSound(SoundEvent.GetEventIdFromString("event:/mission/siege/merlon/wood_destroy"), this.GameEntity.GlobalPosition, false, true, -1, -1);
 
@@ -231,8 +231,7 @@ namespace PersistentEmpiresLib.SceneScripts
             }
 
         }
-
-
+      
         private void checkHittingObject(MatrixFrame oldFrame)
         {
 
@@ -259,7 +258,7 @@ namespace PersistentEmpiresLib.SceneScripts
 
                         List<Vec3> entityCheckPointList = Utilities.GetCollisionCheckPoints(entity, CollisionCheckPointTag);
 
-                        if (Helpers.Utilities.HasClosestToDistanceAsVec3(currentEntityCheckPointList, entityCheckPointList, defaultShipCollisionDistance))
+                        if (Utilities.HasClosestToDistanceAsVec2(currentEntityCheckPointList, entityCheckPointList, defaultShipCollisionDistance))
                         {
                             if (this.IsMovingBackward)
                             {
@@ -285,7 +284,7 @@ namespace PersistentEmpiresLib.SceneScripts
                             {
                                 this.StopTurningRight();
                             }
-                            base.GameEntity.SetFrame(ref oldFrame);
+                            base.GameEntity.SetGlobalFrame(oldFrame);
                             Mission.Current.MakeSound(SoundEvent.GetEventIdFromString("event:/mission/siege/merlon/wood_destroy"), this.GameEntity.GlobalPosition, false, true, -1, -1);
                             this.SetHitPoint(this.HitPoint - 10, new Vec3(0, 0, 0));
                             if (this.GetPilotAgent() != null)
@@ -562,7 +561,7 @@ namespace PersistentEmpiresLib.SceneScripts
         protected override bool OnHit(Agent attackerAgent, int damage, Vec3 impactPosition, Vec3 impactDirection, in MissionWeapon weapon, ScriptComponentBehavior attackerScriptComponentBehavior, out bool reportDamage)
         {
             try
-            {
+            { 
                 reportDamage = true;
                 MissionWeapon missionWeapon = weapon;
                 WeaponComponentData currentUsageItem = missionWeapon.CurrentUsageItem;

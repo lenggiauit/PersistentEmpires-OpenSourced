@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TaleWorlds.Engine;
 using TaleWorlds.Library;
+using TaleWorlds.MountAndBlade;
 
 namespace PersistentEmpiresLib.Helpers
 {
@@ -43,6 +44,36 @@ namespace PersistentEmpiresLib.Helpers
              
 
         }
+
+
+        public static bool RayCastForClosestEntityOrTerrain(List<Vec3> vecS1, GameEntity currentGameEntity, float targetDistance)
+        { 
+            bool found = false;
+            for (int i = 0, j = vecS1.Count() - 1; i < j; i++, j--)
+            { 
+                if (Mission.Current.Scene.RayCastForClosestEntityOrTerrain(vecS1[i], vecS1[i + 1], out float hitDistanceI, out GameEntity hitEntityI) )
+                {
+                    if( hitEntityI != currentGameEntity)
+                    {
+
+                        found = true;
+                        break;
+
+                    } 
+                }
+                if (Mission.Current.Scene.RayCastForClosestEntityOrTerrain(vecS1[j], vecS1[j - 1], out float hitDistanceJ, out GameEntity hitEntityJ))
+                {
+                    if (hitEntityJ != currentGameEntity)
+                    {
+                        found = true;
+                        break; 
+                    }
+                }  
+            }
+
+            return found; 
+        }
+
 
         public static bool HasClosestToDistanceAsVec2(List<Vec3> vecS1, List<Vec3> vecS2, float targetDistance)
         {

@@ -36,6 +36,7 @@ namespace PersistentEmpiresLib.SceneScripts
         public bool CanShipRotate = true;
         public bool CanShipElevate = false;
         public bool ShipAlwaysAlignToTerritory = false;
+        public string ShipName = "Battle Ship";
 
         public bool isPlayerUsing = false;
         public string Animation = "";
@@ -74,11 +75,11 @@ namespace PersistentEmpiresLib.SceneScripts
         private List<RepairReceipt> receipt = new List<RepairReceipt>();
         private bool _landed;
         private bool destroyed = false;
-        private float defaultShipCollisionDistance = 0.1f; 
+        private float defaultShipCollisionDistance = 0.1f;
         protected bool IsShootSideInLeft { get; set; }
         protected float CurrentShootAngle { get; set; }
         protected float CurrentShootLeftRightAngle { get; set; }
-        protected float CurrentShootTopLeftAngle { get; set; }
+        protected float CurrentShootTopLeftAngle = -0.1f;
 
         private bool isHitting = false;
         MatrixFrame canonFrame;
@@ -125,7 +126,7 @@ namespace PersistentEmpiresLib.SceneScripts
         {
             return this.ShipAlwaysAlignToTerritory;
         }
-         
+
         private void ParseRepairReceipts()
         {
             string[] repairReceipt = this.RepairItemRecipies.Split(',');
@@ -152,7 +153,7 @@ namespace PersistentEmpiresLib.SceneScripts
                 if (this.IsMovingUp) this.StopMovingUp();
                 if (this.IsTurningLeft) this.StopTurningLeft();
                 if (this.IsTurningRight) this.StopTurningRight();
-                base.GameEntity.SetFrame(ref oldFrame);
+                base.GameEntity.SetGlobalFrame(oldFrame);
                 Mission.Current.MakeSound(SoundEvent.GetEventIdFromString("event:/mission/siege/merlon/wood_destroy"), this.GameEntity.GlobalPosition, false, true, -1, -1);
                 this.SetHitPoint(this.HitPoint - 10, new Vec3(0, 0, 0));
                 this.isHitting = true;
@@ -199,12 +200,12 @@ namespace PersistentEmpiresLib.SceneScripts
             if (listEntity.Count > 0)
             {
                 if (this.GetPilotAgent() != null)
-                { 
+                {
                     foreach (GameEntity entity in listEntity)
-                    { 
+                    {
                         List<Vec3> entityCheckPointList = Utilities.GetCollisionCheckPoints(entity, CollisionCheckPointTag);
 
-                        if (Helpers.Utilities.HasClosestToDistanceAsVec3(currentEntityCheckPointList, entityCheckPointList, defaultShipCollisionDistance))
+                        if (Helpers.Utilities.HasClosestToDistanceAsVec2(currentEntityCheckPointList, entityCheckPointList, defaultShipCollisionDistance))
                         {
                             if (this.IsMovingBackward)
                             {
@@ -230,7 +231,7 @@ namespace PersistentEmpiresLib.SceneScripts
                             {
                                 this.StopTurningRight();
                             }
-                            base.GameEntity.SetFrame(ref oldFrame);
+                            base.GameEntity.SetGlobalFrame(oldFrame);
                             Mission.Current.MakeSound(SoundEvent.GetEventIdFromString("event:/mission/siege/merlon/wood_destroy"), this.GameEntity.GlobalPosition, false, true, -1, -1);
                             this.SetHitPoint(this.HitPoint - 10, new Vec3(0, 0, 0));
                             if (this.GetPilotAgent() != null)
@@ -240,7 +241,7 @@ namespace PersistentEmpiresLib.SceneScripts
                             this.isHitting = true;
                             break;
 
-                        } 
+                        }
                     }
                 }
 
@@ -516,7 +517,9 @@ namespace PersistentEmpiresLib.SceneScripts
             {
                 if (this.GetPilotAgent() != null)
                 {
-                    if (this.GetPilotAgent().Position.Distance(base.GameEntity.GlobalPosition) > 7f)
+                    float controlDistance = this.GameEntity.GetPhysicsBoundingBoxMin().Distance( this.GameEntity.GetPhysicsBoundingBoxMax());
+                     
+                    if (this.GetPilotAgent().Position.Distance(base.GameEntity.GlobalPosition) > controlDistance)
                     {
                         this.GetPilotAgent().StopUsingGameObjectMT(false);
                     }
@@ -950,6 +953,58 @@ namespace PersistentEmpiresLib.SceneScripts
             // this.UpdateCanonPosition(); 
         }
 
+         
+        private void ShootProjectile()
+        {
+            Mission.Current.MakeSound(SoundEvent.GetEventIdFromString("cannonfire"), this.GameEntity.GlobalPosition, false, true, -1, -1);
+            if (LoadedMissileItem.StringId == "grapeshot_fire_stack")
+            {
+                ItemObject @object = Game.Current.ObjectManager.GetObject<ItemObject>("grapeshot_fire_projectile");
+                for (int i = 0; i < 5; i++)
+                {
+                    ShootProjectileAux(@object, randomizeMissileSpeed: true);
+                }
+            }
+            else
+            {
+                ShootProjectileAux(LoadedMissileItem, randomizeMissileSpeed: false);
+            }
+             
+        }
+
+        private Vec3 GetBallisticErrorAppliedDirection(float BallisticErrorAmount)
+        {
+            Mat3 mat = default(Mat3);
+            mat.f = ShootingDirection;
+            mat.u = Vec3.Up;
+            Mat3 mat2 = mat;
+            mat2.Orthonormalize();
+            float a = MBRandom.RandomFloat * ((float)Math.PI * 2f);
+            mat2.RotateAboutForward(a);
+            float f = BallisticErrorAmount * MBRandom.RandomFloat;
+            mat2.RotateAboutSide(f.ToRadians());
+            return mat2.f;
+        }
+
+        private void ShootProjectileAux(ItemObject missileItem, bool randomizeMissileSpeed)
+        {
+            Mat3 identity = Mat3.Identity;
+            float num = ShootingSpeed;
+            if (randomizeMissileSpeed)
+            {
+                num *= MBRandom.RandomFloatRanged(0.9f, 1.1f);
+                identity.f = GetBallisticErrorAppliedDirection(2.5f);
+                identity.Orthonormalize();
+            }
+            else
+            {
+                identity.f = GetBallisticErrorAppliedDirection(MaximumBallisticError);
+                identity.Orthonormalize();
+            }
+
+            Mission.Current.AddCustomMissile(base.PilotAgent, new MissionWeapon(missileItem, null, base.PilotAgent.Origin?.Banner, 1), ProjectileEntityCurrentGlobalPosition, identity.f, identity, LoadedMissileItem.PrimaryWeapon.MissileSpeed, num, addRigidBody: false, this);
+        }
+
         // Token: 0x06002CCB RID: 11467 RVA: 0x000B0BD8 File Offset: 0x000AEDD8
         protected override void OnRangedSiegeWeaponStateChange()
         {
@@ -957,6 +1012,11 @@ namespace PersistentEmpiresLib.SceneScripts
             RangedSiegeWeapon.WeaponState state = base.State;
             if (state != RangedSiegeWeapon.WeaponState.Idle)
             {
+                if (state == RangedSiegeWeapon.WeaponState.Shooting)
+                {
+                    Mission.Current.MakeSound(SoundEvent.GetEventIdFromString("cannonfire"), this.GameEntity.GlobalPosition, false, true, -1, -1);
+                }
+
                 if (state != RangedSiegeWeapon.WeaponState.Shooting)
                 {
                     if (state == RangedSiegeWeapon.WeaponState.WaitingBeforeIdle)
@@ -967,12 +1027,14 @@ namespace PersistentEmpiresLib.SceneScripts
                 }
                 else
                 {
+                    //ShootProjectile();
                     if (!GameNetwork.IsClientOrReplay)
                     {
                         base.Projectile.SetVisibleSynched(false, false);
                         return;
                     }
-                    base.Projectile.GameEntity.SetVisibilityExcludeParents(false);
+                    base.Projectile.GameEntity.SetVisibilityExcludeParents(false); 
+
                     return;
                 }
             }
@@ -992,6 +1054,7 @@ namespace PersistentEmpiresLib.SceneScripts
         {
             this.MoveSoundIndex = SoundEvent.GetEventIdFromString("event:/mission/siege/mangonel/move");
             this.ReloadSoundIndex = SoundEvent.GetEventIdFromString("event:/mission/siege/mangonel/reload");
+            this.ReloadEndSoundIndex = SoundEvent.GetEventIdFromString("event:/mission/siege/mangonel/reload_end");
         }
 
         // Token: 0x17000800 RID: 2048
@@ -1081,14 +1144,14 @@ namespace PersistentEmpiresLib.SceneScripts
                     {
                         NetworkCommunicator player = pilotAgent.MissionPeer.GetNetworkPeer();
                         PersistentEmpireRepresentative persistentEmpireRepresentative = player.GetComponent<PersistentEmpireRepresentative>();
-                        return new TextObject("{=NbpcDXtJ} " + persistentEmpireRepresentative.GetFaction().name + "'s " + " Warship", null).ToString();
+                        return new TextObject("{=NbpcDXtJ} " + persistentEmpireRepresentative.GetFaction().name + "'s " +  ShipName, null).ToString();
                     }
                     catch (Exception ex)
                     {
                         Debug.Print("[ERROR WARSHIP GetDescriptionText LOG] " + ex.Message);
                     }
                 }
-                return new TextObject("{=NbpcDXtJ} Warship", null).ToString();
+                return new TextObject("{=NbpcDXtJ} "+ ShipName, null).ToString();
             }
             return new TextObject("{=pzfbPbWW}Boulder", null).ToString();
         }
