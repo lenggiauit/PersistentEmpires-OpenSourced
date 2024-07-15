@@ -1,7 +1,7 @@
 ﻿using PersistentEmpiresLib.Helpers;
 using PersistentEmpiresLib.SceneScripts.Interfaces;
-using System; 
-using System.Reflection; 
+using System;
+using System.Reflection;
 using TaleWorlds.Core;
 using TaleWorlds.Engine;
 using TaleWorlds.InputSystem;
@@ -15,7 +15,7 @@ namespace PersistentEmpiresLib.SceneScripts
     {
         // public override ScriptComponentBehavior.TickRequirement GetTickRequirement() => !this.GameEntity.IsVisibleIncludeParents() ? base.GetTickRequirement() : ScriptComponentBehavior.TickRequirement.Tick | ScriptComponentBehavior.TickRequirement.TickParallel;
 
-        public bool AttachableToHorse = true;
+        public bool AttachableToHorse = false;
         public string AttachableHorseType = "";
         public int StrayDurationSeconds = 7200;
         private long WillBeDeletedAt = 0;
@@ -130,6 +130,7 @@ namespace PersistentEmpiresLib.SceneScripts
         public override void OnUse(Agent userAgent)
         {
             base.OnUse(userAgent);
+            if (userAgent.Controller == Agent.ControllerType.AI || userAgent.IsAIControlled) return;
             Debug.Print("[USING LOG] AGENT USING " + this.GetType().Name);
             if (this.AttachedTo == null)
             {
@@ -210,6 +211,7 @@ namespace PersistentEmpiresLib.SceneScripts
         protected override bool OnHit(Agent attackerAgent, int damage, Vec3 impactPosition, Vec3 impactDirection, in MissionWeapon weapon, ScriptComponentBehavior attackerScriptComponentBehavior, out bool reportDamage)
         {
             reportDamage = true;
+            if (attackerAgent.Controller == Agent.ControllerType.AI || attackerAgent.IsAIControlled) { return false; }
             MissionWeapon missionWeapon = weapon;
             WeaponComponentData currentUsageItem = missionWeapon.CurrentUsageItem;
             if (impactDirection == null) impactDirection = Vec3.Zero;

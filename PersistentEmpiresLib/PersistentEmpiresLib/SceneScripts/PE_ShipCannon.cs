@@ -141,25 +141,19 @@ namespace PersistentEmpiresLib.SceneScripts
 
         private void CheckIfLanded(MatrixFrame oldFrame)
         {
-            if (base.GameEntity == null) return;
-            if (oldFrame == null) return;
+            if (base.GameEntity == null || oldFrame == null) return;
+
             float heightUnder = Mission.Current.Scene.GetTerrainHeight(this.GameEntity.GlobalPosition.AsVec2, true);
             if (base.GameEntity.GlobalPosition.Z - heightUnder <= 0.2f)
             {
                 Debugger.Break();
-                if (this.IsMovingBackward) this.StopMovingBackward();
-                if (this.IsMovingDown) this.StopMovingDown();
-                if (this.IsMovingForward) this.StopMovingForward();
-                if (this.IsMovingUp) this.StopMovingUp();
-                if (this.IsTurningLeft) this.StopTurningLeft();
-                if (this.IsTurningRight) this.StopTurningRight();
+                StopMovement();
                 base.GameEntity.SetGlobalFrame(oldFrame);
                 Mission.Current.MakeSound(SoundEvent.GetEventIdFromString("event:/mission/siege/merlon/wood_destroy"), this.GameEntity.GlobalPosition, false, true, -1, -1);
                 this.SetHitPoint(this.HitPoint - 10, new Vec3(0, 0, 0));
                 this.isHitting = true;
             }
-        }
-
+        } 
 
         private void UpdateParticle()
         {
@@ -182,70 +176,57 @@ namespace PersistentEmpiresLib.SceneScripts
 
         private void checkHittingObject(MatrixFrame oldFrame)
         {
+            if (base.GameEntity == null || oldFrame == null) return;
 
-            if (base.GameEntity == null) return;
-            if (oldFrame == null) return;
+            var entitiesToCheck = new List<GameEntity>();
+            var entityOrigin = this.GameEntity.GetGlobalFrame().origin;
 
-            List<GameEntity> listEntity = new List<GameEntity>();
-            Vec3 entityOrigin = this.GameEntity.GetGlobalFrame().origin;
-            Mission.Current.Scene.GetAllEntitiesWithScriptComponent<PE_BlocShip>(ref listEntity);
-            List<GameEntity> listEntity2 = new List<GameEntity>();
-            Mission.Current.Scene.GetAllEntitiesWithScriptComponent<PE_ShipCannon>(ref listEntity2);
-            listEntity.AddRange(listEntity2);
+            Mission.Current.Scene.GetAllEntitiesWithScriptComponent<PE_BlocShip>(ref entitiesToCheck);
+            var additionalEntities = new List<GameEntity>();
+            Mission.Current.Scene.GetAllEntitiesWithScriptComponent<PE_ShipCannon>(ref additionalEntities);
+            entitiesToCheck.AddRange(additionalEntities);
 
-            listEntity = listEntity.Where(e => entityOrigin.Distance(e.GetGlobalFrame().origin) <= 20 && e != this.GameEntity).ToList();
+            entitiesToCheck = entitiesToCheck
+                .Where(e => entityOrigin.Distance(e.GetGlobalFrame().origin) <= 20 && e != this.GameEntity)
+                .ToList();
 
-            List<Vec3> currentEntityCheckPointList = Utilities.GetCollisionCheckPoints(this.GameEntity, CollisionCheckPointTag);
+            var currentEntityCheckPoints = Utilities.GetCollisionCheckPoints(this.GameEntity, CollisionCheckPointTag);
 
-            if (listEntity.Count > 0)
+            if (entitiesToCheck.Any())
             {
-                if (this.GetPilotAgent() != null)
+                var pilotAgent = this.GetPilotAgent();
+
+                foreach (var entity in entitiesToCheck)
                 {
-                    foreach (GameEntity entity in listEntity)
+                    var entityCheckPoints = Utilities.GetCollisionCheckPoints(entity, CollisionCheckPointTag);
+
+                    if (Helpers.Utilities.HasClosestToDistanceAsVec2(currentEntityCheckPoints, entityCheckPoints, defaultShipCollisionDistance))
                     {
-                        List<Vec3> entityCheckPointList = Utilities.GetCollisionCheckPoints(entity, CollisionCheckPointTag);
+                        StopMovement();
+                        base.GameEntity.SetGlobalFrame(oldFrame);
+                        Mission.Current.MakeSound(SoundEvent.GetEventIdFromString("event:/mission/siege/merlon/wood_destroy"), this.GameEntity.GlobalPosition, false, true, -1, -1);
+                        this.SetHitPoint(this.HitPoint - 10, new Vec3(0, 0, 0));
 
-                        if (Helpers.Utilities.HasClosestToDistanceAsVec2(currentEntityCheckPointList, entityCheckPointList, defaultShipCollisionDistance))
+                        if (pilotAgent != null)
                         {
-                            if (this.IsMovingBackward)
-                            {
-                                this.StopMovingBackward();
-                            }
-                            if (this.IsMovingDown)
-                            {
-                                this.StopMovingDown();
-                            }
-                            if (this.IsMovingForward)
-                            {
-                                this.StopMovingForward();
-                            }
-                            if (this.IsMovingUp)
-                            {
-                                this.StopMovingUp();
-                            }
-                            if (this.IsTurningLeft)
-                            {
-                                this.StopTurningLeft();
-                            }
-                            if (this.IsTurningRight)
-                            {
-                                this.StopTurningRight();
-                            }
-                            base.GameEntity.SetGlobalFrame(oldFrame);
-                            Mission.Current.MakeSound(SoundEvent.GetEventIdFromString("event:/mission/siege/merlon/wood_destroy"), this.GameEntity.GlobalPosition, false, true, -1, -1);
-                            this.SetHitPoint(this.HitPoint - 10, new Vec3(0, 0, 0));
-                            if (this.GetPilotAgent() != null)
-                            {
-                                this.GetPilotAgent().StopUsingGameObjectMT(false);
-                            }
-                            this.isHitting = true;
-                            break;
-
+                            pilotAgent.StopUsingGameObjectMT(false);
                         }
+
+                        this.isHitting = true;
+                        break;
                     }
                 }
-
             }
+        }
+
+        private void StopMovement()
+        {
+            if (this.IsMovingBackward) this.StopMovingBackward();
+            if (this.IsMovingDown) this.StopMovingDown();
+            if (this.IsMovingForward) this.StopMovingForward();
+            if (this.IsMovingUp) this.StopMovingUp();
+            if (this.IsTurningLeft) this.StopTurningLeft();
+            if (this.IsTurningRight) this.StopTurningRight();
         }
 
 
@@ -512,30 +493,24 @@ namespace PersistentEmpiresLib.SceneScripts
 
         protected void MoveControl()
         {
-
             if (GameNetwork.IsServer)
             {
-                if (this.GetPilotAgent() != null)
+                var pilotAgent = this.GetPilotAgent();
+                if (pilotAgent != null)
                 {
-                    float controlDistance = this.GameEntity.GetPhysicsBoundingBoxMin().Distance( this.GameEntity.GetPhysicsBoundingBoxMax());
-                     
-                    if (this.GetPilotAgent().Position.Distance(base.GameEntity.GlobalPosition) > controlDistance)
+                    float controlDistance = this.GameEntity.GetPhysicsBoundingBoxMin().Distance(this.GameEntity.GetPhysicsBoundingBoxMax());
+
+                    if (pilotAgent.Position.Distance(base.GameEntity.GlobalPosition) > controlDistance)
                     {
-                        this.GetPilotAgent().StopUsingGameObjectMT(false);
+                        pilotAgent.StopUsingGameObjectMT(false);
                     }
-                }
-            }
 
-            if (GameNetwork.IsServer)
-            {
-                if (this.GetPilotAgent() != null)
-                {
                     if (this.RidingSkill != null)
                     {
-                        int skillValue = this.GetPilotAgent().Character.GetSkillValue(this.RidingSkill);
+                        int skillValue = pilotAgent.Character.GetSkillValue(this.RidingSkill);
                         if (skillValue < this.RidingSkillRequired)
                         {
-                            this.GetPilotAgent().StopUsingGameObjectMT(false);
+                            pilotAgent.StopUsingGameObjectMT(false);
                             return;
                         }
                     }
@@ -545,78 +520,87 @@ namespace PersistentEmpiresLib.SceneScripts
 
             if (GameNetwork.IsClient)
             {
-                if (Agent.Main != null && this.GetPilotAgent() == Agent.Main)
+                var mainAgent = Agent.Main;
+                var pilotAgent = this.GetPilotAgent();
+                if (mainAgent != null && pilotAgent == mainAgent)
                 {
-                    if (Mission.Current.InputManager.IsKeyPressed(InputKey.W))
-                    {
-                        this.RequestMovingForward();
-                    }
-                    else if (Mission.Current.InputManager.IsKeyReleased(InputKey.W))
-                    {
-                        this.RequestStopMovingForward();
-                    }
-                    if (Mission.Current.InputManager.IsKeyPressed(InputKey.S))
-                    {
-                        this.RequestMovingBackward();
-                    }
-                    else if (Mission.Current.InputManager.IsKeyReleased(InputKey.S))
-                    {
-                        this.RequestStopMovingBackward();
-                    }
-                    if (Mission.Current.InputManager.IsKeyPressed(InputKey.A))
-                    {
-                        this.RequestTurningLeft();
-                    }
-                    else if (Mission.Current.InputManager.IsKeyReleased(InputKey.A))
-                    {
-                        this.RequestStopTurningLeft();
-                    }
-                    if (Mission.Current.InputManager.IsKeyPressed(InputKey.D))
-                    {
-                        this.RequestTurningRight();
-                    }
-                    else if (Mission.Current.InputManager.IsKeyReleased(InputKey.D))
-                    {
-                        this.RequestStopTurningRight();
-                    }
-                    if (Mission.Current.InputManager.IsKeyPressed(InputKey.Space))
-                    {
-                        this.RequestMovingUp();
-                    }
-                    else if (Mission.Current.InputManager.IsKeyReleased(InputKey.Space))
-                    {
-                        this.RequestStopMovingUp();
-                    }
-                    if (Mission.Current.InputManager.IsKeyPressed(InputKey.LeftShift))
-                    {
-                        this.RequestMovingDown();
-                    }
-                    else if (Mission.Current.InputManager.IsKeyReleased(InputKey.LeftShift))
-                    {
-                        this.RequestStopMovingDown();
-                    }
-                    if (Mission.Current.InputManager.IsKeyPressed(InputKey.F))
-                    {
-                        GameNetwork.MyPeer.ControlledAgent.HandleStopUsingAction();
-                        ActionIndexCache ac = ActionIndexCache.act_none;
-                        this.GetPilotAgent().SetActionChannel(0, ac, true, 0UL, 0.0f, 1f, -0.2f, 0.4f, 0, false, -0.2f, 0, true);
-                    }
-
+                    HandleClientInput();
                 }
-                // UpdateParticle();
+                // UpdateParticle();  // Uncomment if needed
             }
+
             if (this.GetPilotAgent() == null)
             {
-                if (this.IsMovingBackward) this.StopMovingBackward();
-                if (this.IsMovingDown) this.StopMovingDown();
-                if (this.IsMovingForward) this.StopMovingForward();
-                if (this.IsMovingUp) this.StopMovingUp();
-                if (this.IsTurningLeft) this.StopTurningLeft();
-                if (this.IsTurningRight) this.StopTurningRight();
+                StopMovement();
+            }
+        }
+
+        private void HandleClientInput()
+        {
+            var inputManager = Mission.Current.InputManager;
+
+            if (inputManager.IsKeyPressed(InputKey.W))
+            {
+                this.RequestMovingForward();
+            }
+            else if (inputManager.IsKeyReleased(InputKey.W))
+            {
+                this.RequestStopMovingForward();
             }
 
+            if (inputManager.IsKeyPressed(InputKey.S))
+            {
+                this.RequestMovingBackward();
+            }
+            else if (inputManager.IsKeyReleased(InputKey.S))
+            {
+                this.RequestStopMovingBackward();
+            }
 
+            if (inputManager.IsKeyPressed(InputKey.A))
+            {
+                this.RequestTurningLeft();
+            }
+            else if (inputManager.IsKeyReleased(InputKey.A))
+            {
+                this.RequestStopTurningLeft();
+            }
+
+            if (inputManager.IsKeyPressed(InputKey.D))
+            {
+                this.RequestTurningRight();
+            }
+            else if (inputManager.IsKeyReleased(InputKey.D))
+            {
+                this.RequestStopTurningRight();
+            }
+
+            if (inputManager.IsKeyPressed(InputKey.Space))
+            {
+                this.RequestMovingUp();
+            }
+            else if (inputManager.IsKeyReleased(InputKey.Space))
+            {
+                this.RequestStopMovingUp();
+            }
+
+            if (inputManager.IsKeyPressed(InputKey.LeftShift))
+            {
+                this.RequestMovingDown();
+            }
+            else if (inputManager.IsKeyReleased(InputKey.LeftShift))
+            {
+                this.RequestStopMovingDown();
+            }
+
+            if (inputManager.IsKeyPressed(InputKey.F))
+            {
+                GameNetwork.MyPeer.ControlledAgent.HandleStopUsingAction();
+                var actionIndex = ActionIndexCache.act_none;
+                this.GetPilotAgent().SetActionChannel(0, actionIndex, true, 0UL, 0.0f, 1f, -0.2f, 0.4f, 0, false, -0.2f, 0, true);
+            }
         }
+
 
         // Token: 0x06002CC7 RID: 11463 RVA: 0x000B01C0 File Offset: 0x000AE3C0
         protected override void OnTick(float dt)
@@ -1159,14 +1143,19 @@ namespace PersistentEmpiresLib.SceneScripts
         // Token: 0x06002CD5 RID: 11477 RVA: 0x000B0E1C File Offset: 0x000AF01C
         public override TextObject GetActionTextForStandingPoint(UsableMissionObject usableGameObject)
         {
+            string keyHyperlinkText = HyperlinkTexts.GetKeyHyperlinkText(HotKeyManager.GetHotKeyId("CombatHotKeyCategory", 13));
             TextObject textObject;
+
             if (usableGameObject.GameEntity.HasTag("reload"))
             {
-                textObject = new TextObject((base.PilotStandingPoint == usableGameObject) ? "{=fEQAPJ2e}{KEY} Use to attack" : "{=Na81xuXn}{KEY} Command Ship", null);
+                string text = base.PilotStandingPoint == usableGameObject
+                    ? "{=fEQAPJ2e}{KEY} Use to attack"
+                    : "{=Na81xuXn}{KEY} Command Ship";
+                textObject = new TextObject(text, null);
             }
             else if (usableGameObject.GameEntity.HasTag("mover"))
             {
-                textObject = new TextObject("{=5wx4BF5h}{KEY}  Command Ship", null);
+                textObject = new TextObject("{=5wx4BF5h}{KEY} Command Ship", null);
             }
             else if (usableGameObject.GameEntity.HasTag("rotate"))
             {
@@ -1184,7 +1173,8 @@ namespace PersistentEmpiresLib.SceneScripts
             {
                 textObject = new TextObject("{=fEQAPJ2e}{KEY} Use", null);
             }
-            textObject.SetTextVariable("KEY", HyperlinkTexts.GetKeyHyperlinkText(HotKeyManager.GetHotKeyId("CombatHotKeyCategory", 13)));
+
+            textObject.SetTextVariable("KEY", keyHyperlinkText);
             return textObject;
         }
 
@@ -1351,6 +1341,7 @@ namespace PersistentEmpiresLib.SceneScripts
             try
             {
                 reportDamage = true;
+                if (attackerAgent.Controller == Agent.ControllerType.AI || attackerAgent.IsAIControlled) { return false; }
                 MissionWeapon missionWeapon = weapon;
                 WeaponComponentData currentUsageItem = missionWeapon.CurrentUsageItem;
                 if (

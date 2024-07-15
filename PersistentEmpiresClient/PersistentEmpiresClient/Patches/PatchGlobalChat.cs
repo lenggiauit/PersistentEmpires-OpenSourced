@@ -24,8 +24,8 @@ namespace PersistentEmpiresHarmony.Patches
         public static bool PrefixClientEventPlayerMessageAll(NetworkCommunicator networkPeer, NetworkMessages.FromClient.PlayerMessageAll message)
         {
             if (OnClientEventPlayerMessageAll != null)
-            {
-                return OnClientEventPlayerMessageAll(networkPeer, message);
+            {  
+               return OnClientEventPlayerMessageAll(networkPeer, message); 
             }
             return true;
         }

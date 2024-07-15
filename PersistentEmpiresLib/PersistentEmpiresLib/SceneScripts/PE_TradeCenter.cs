@@ -85,6 +85,7 @@ namespace PersistentEmpiresLib.SceneScripts
         }
         public override void OnUse(Agent userAgent)
         {
+            if (userAgent.Controller == Agent.ControllerType.AI || userAgent.IsAIControlled) return;
             if (!base.IsUsable(userAgent))
             {
                 userAgent.StopUsingGameObjectMT(false);

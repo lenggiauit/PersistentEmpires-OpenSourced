@@ -27,7 +27,7 @@ namespace PersistentEmpiresServer.ServerMissions
             commands = new Dictionary<string, Command>();
             Muted = new Dictionary<NetworkCommunicator, bool>();
             Instance = this;
-            PatchGlobalChat.OnClientEventPlayerMessageAll += PatchGlobalChat_OnClientEventPlayerMessageAll;
+           // PatchGlobalChat.OnClientEventPlayerMessageAll += PatchGlobalChat_OnClientEventPlayerMessageAll;
             LocalChatComponent localChat = base.Mission.GetMissionBehavior<LocalChatComponent>();
             localChat.OnPrefixHandleLocalChatFromClient += this.OnPrefixHandleLocalChatFromClient;
 

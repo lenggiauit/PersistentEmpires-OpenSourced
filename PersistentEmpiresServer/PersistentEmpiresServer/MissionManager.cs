@@ -13,15 +13,16 @@ namespace PersistentEmpiresServer
     {
         [MissionMethod]
         public static void OpenPersistentEmpires(string scene) {
-            MissionState.OpenNew("DragonVStudio"  , new MissionInitializerRecord(scene), delegate (Mission missionController)
-            {
-                return new MissionBehavior[]
-                    {
+            MissionState.OpenNew("DragonVStudio", new MissionInitializerRecord(scene), delegate (Mission missionController)
+        {
+
+            return new MissionBehavior[]
+                {
                         new PersistentEmpireBehavior(),
                         new SaveSystemBehavior(), // Most important behavior
-						new DayNightCycleBehavior(),
-						// 2.0.0.76561198064533271
-						MissionLobbyComponent.CreateBehavior(),
+                        new DayNightCycleBehavior(),
+                        // 2.0.0.76561198064533271
+                        MissionLobbyComponent.CreateBehavior(),
                         new DrowningBehavior(),
                         new NotAllPlayersJoinFixBehavior(),
                         new AnimalButcheringBehavior(),
@@ -36,58 +37,59 @@ namespace PersistentEmpiresServer
                         new PersistentEmpireSceneSyncBehaviors(),
                         new ImportExportComponent(),
                         new MultiplayerTimerComponent(),
-						// new MultiplayerMissionAgentVisualSpawnComponent(),
-						new CraftingComponent(),
+                        // new MultiplayerMissionAgentVisualSpawnComponent(),
+                        new CraftingComponent(),
                         new MoneyPouchBehavior(),
                         new StockpileMarketComponent(),
                         new LocalChatComponent(),
 
-                         new DragonVItemBehavior(),
+                        new DragonVItemBehavior(),
 
                         new InstrumentsBehavior(),
                         new CombatlogBehavior(),
-						// new WhitelistBehavior(),
-						new AgentHungerBehavior(),
+                        // new WhitelistBehavior(),
+                        new AgentHungerBehavior(),
                         new SpawnFrameSelectionBehavior(),
-						// new ConsoleMatchStartEndHandler(),
-						new SpawnComponent(new PersistentEmpireSpawnFrameBehavior(), new PersistentEmpiresSpawningBehavior()),
+                        // new ConsoleMatchStartEndHandler(),
+                        new SpawnComponent(new PersistentEmpireSpawnFrameBehavior(), new PersistentEmpiresSpawningBehavior()),
+                        new SpawnBotBehavior(), 
                         // To add bots
                         //new SpawnComponent(new BOTsSpawnFrameBehavior(), new BOTSpawnFrameBehavior()),
                         new MissionLobbyEquipmentNetworkComponent(),
                         new ProximityChatComponent(),
-						// new MultiplayerTeamSelectComponent(),
-						// new MissionHardBorderPlacer(),
-						new MissionBoundaryPlacer(),
-                        new MissionBoundaryCrossingHandler(),
-						// new MultiplayerPollComponent(),
-						// new MultiplayerAdminComponent(),
-						// new MultiplayerGameNotificationsComponent(),
-						new MissionOptionsComponent(),
+                        // new MultiplayerTeamSelectComponent(),
+                        // new MissionHardBorderPlacer(),
+                        new MissionBoundaryPlacer(),
+                        new MissionBoundaryCrossingHandler(), 
+                        // new MultiplayerPollComponent(),
+                        // new MultiplayerAdminComponent(),
+                        // new MultiplayerGameNotificationsComponent(),
+                        new MissionOptionsComponent(),
                         new MissionScoreboardComponent(new TDMScoreboardData()),
                         new MissionAgentPanicHandler(), // APTAL ERAYIN İŞLERİ
-						new AdminServerBehavior(),
+                        new AdminServerBehavior(),
                         new BankingComponent(),
                         new PatreonRegistryBehavior(),
                         new TradingCenterBehavior(),
                         new MoneyChestBehavior(),
-						// new DecapitationBehavior(),
-						new PickpocketingBehavior(),
+                        // new DecapitationBehavior(),
+                        new PickpocketingBehavior(),
                         new LockpickingBehavior(),
                         new PoisoningBehavior(),
                         new AutorestartBehavior(),
                         new AnimationBehavior(),
                         new ChatCommandSystem(),
-                        new WhitelistBehavior(), 
-						//new AgentHumanAILogic(),
-      //                  new AgentCommonAILogic(), 
-						// new EquipmentControllerLeaveLogic(),
-						// new MultiplayerPreloadHelper()
+                        new WhitelistBehavior(),
+                        //new AgentHumanAILogic(),
+                        //new AgentCommonAILogic(), 
+                        // new EquipmentControllerLeaveLogic(),
+                        // new MultiplayerPreloadHelper()
                         //
-                        new DiscordRoleRegistryBehavior(), 
-                       
+                       // new DiscordRoleRegistryBehavior()
 
-                    };
-            }, true, true);
+                }; 
+
+        }, true, true);
         }
     }
 }

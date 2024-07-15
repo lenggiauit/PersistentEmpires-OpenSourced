@@ -98,7 +98,7 @@ namespace PersistentEmpiresServer.ServerMissions
             }
             if (IsPlayerAdmin(networkPeer))
             {
-                networkPeer.GetComponent<PersistentEmpireRepresentative>().IsAdmin = true; 
+                networkPeer.GetComponent<PersistentEmpireRepresentative>().IsAdmin = true;
                 networkPeer.GetComponent<PersistentEmpireRepresentative>().IsSpawnableItemAdmin =  IsSpawnItemsAdmin(networkPeer); 
                 GameNetwork.BeginModuleEventAsServer(networkPeer);
                 GameNetwork.WriteMessage(new AuthorizeAsAdmin());
@@ -390,7 +390,7 @@ namespace PersistentEmpiresServer.ServerMissions
                 this.BanPlayer(requestTempBan.Player, tempBan * 60 * 60); // 6 fuckin hours
             }
             else
-            {  
+            {
                 OnBanPlayer(requestTempBan.Player.VirtualPlayer.Id.ToString(), requestTempBan.Player.UserName, DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 1 * tempBan * 60 * 60);
             }
             LoggerHelper.LogAnAction(player, LogAction.PlayerTempBanPlayer, new AffectedPlayer[] { new AffectedPlayer(requestTempBan.Player) });

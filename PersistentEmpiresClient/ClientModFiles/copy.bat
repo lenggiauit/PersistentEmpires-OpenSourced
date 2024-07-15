@@ -1,6 +1,6 @@
 @echo off
 set "source_folder=.\GUI"
-set "destination_folder=D:\SteamLibrary\steamapps\common\Mount & Blade II Bannerlord\Modules\PersistentEmpires\GUI"
+set "destination_folder=D:\Steam games\steamapps\common\Mount & Blade II Bannerlord\Modules\DragonVStudio\GUI"
 
 echo Copying GUI folder...
 

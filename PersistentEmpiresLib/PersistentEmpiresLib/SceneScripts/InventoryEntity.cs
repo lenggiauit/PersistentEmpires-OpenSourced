@@ -194,6 +194,7 @@ namespace PersistentEmpiresLib.SceneScripts
         public override void OnUse(Agent userAgent)
         {
             base.OnUse(userAgent);
+            if (userAgent.Controller == Agent.ControllerType.AI || userAgent.IsAIControlled) return;
             Debug.Print("[USING LOG] AGENT USE " + this.GetType().Name + " ID " + this.InventoryId + " PLAYER " + userAgent.MissionPeer.DisplayedName);
             if (this.GameEntity == null || this.InteractionEntity == null) return;
 

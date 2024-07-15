@@ -10,6 +10,7 @@ namespace PersistentEmpiresLib.GameModes
         public static StartMultiplayerGameDelegate OnStartMultiplayerGame;
         public PersistentEmpiresGameMode(string name) : base(name)
         {
+            
 
         }
 

@@ -1,4 +1,5 @@
-﻿using PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors;
+﻿using PersistentEmpiresHarmony.Patches;
+using PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors;
 using PersistentEmpiresMission.MissionBehaviors;
 using TaleWorlds.Core;
 using TaleWorlds.MountAndBlade;
@@ -37,7 +38,7 @@ namespace PersistentEmpiresClient
                     new MissionBoundaryPlacer(),
                     new MissionBoundaryCrossingHandler(),
                     new FactionUIComponent(),
-                    new LocalChatComponent(),
+                    new LocalChatComponent(), 
                     new MissionOptionsComponent(),
                     new MissionScoreboardComponent(new TDMScoreboardData()),
                     new AdminClientBehavior(),
@@ -49,7 +50,7 @@ namespace PersistentEmpiresClient
                     new InstrumentsBehavior(),
                     new MoneyChestBehavior(),
                     //new DecapitationBehavior(),
-                    new AnimationBehavior(),  
+                    new AnimationBehavior(),
                     //new AgentCommonAILogic(),
                     //new AgentHumanAILogic(), 
                     

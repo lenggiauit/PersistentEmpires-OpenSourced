@@ -106,6 +106,7 @@ namespace PersistentEmpiresLib.SceneScripts
         public override void OnUse(Agent userAgent)
         {
             base.OnUse(userAgent);
+            if (userAgent.Controller == Agent.ControllerType.AI || userAgent.IsAIControlled) return;
             if (GameNetwork.IsServer)
             {
                 Debug.Print("[USING LOG] AGENT USE " + this.GetType().Name);
@@ -176,6 +177,7 @@ namespace PersistentEmpiresLib.SceneScripts
         protected override bool OnHit(Agent attackerAgent, int damage, Vec3 impactPosition, Vec3 impactDirection, in MissionWeapon weapon, ScriptComponentBehavior attackerScriptComponentBehavior, out bool reportDamage)
         {
             reportDamage = false;
+            if (attackerAgent.Controller == Agent.ControllerType.AI || attackerAgent.IsAIControlled) return false;
             if (attackerAgent == null) return false;
             NetworkCommunicator player = attackerAgent.MissionPeer.GetNetworkPeer();
             bool isAdmin = Main.IsPlayerAdmin(player);

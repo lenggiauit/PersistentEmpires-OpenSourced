@@ -134,7 +134,7 @@ namespace PersistentEmpiresLib.SceneScripts
                     SpawnableItem spawnableItem = this.SpawnableItems.FirstOrDefault((s) => s.SpawnerItem.Id == missionWeapon.Item.Id);
                     if (spawnableItem.SpawnerItem == null) this.DespawnNearest(userAgent);
                     else
-                    {
+                    { 
                         //InformationComponent.Instance.SendMessage("MaxSpawnAmount: " + spawnableItem.MaxSpawnAmount, new Color(1f, 0, 0).ToUnsignedInteger(), userAgent.MissionPeer.GetNetworkPeer());
                         if (this.SpawnedPrefabs.Count < spawnableItem.MaxSpawnAmount)
                         {
@@ -153,14 +153,14 @@ namespace PersistentEmpiresLib.SceneScripts
         {
             EquipmentIndex equipmentIndex = userAgent.GetWieldedItemIndex(Agent.HandIndex.MainHand);
             userAgent.RemoveEquippedWeapon(equipmentIndex);
-             
-            MatrixFrame spawnFrame = this.SpawningPoint.GetGlobalFrame(); 
+
+            MatrixFrame spawnFrame = this.SpawningPoint.GetGlobalFrame();
             Vec3 vecspawnFrame = new Vec3(spawnFrame.origin.X + spawnableItem.AdjustPositionX, spawnFrame.origin.Y + spawnableItem.AdjustPositionY, spawnFrame.origin.Z + spawnableItem.AdjustPositionZ);
 
             MatrixFrame adjSpawnFrame = new MatrixFrame(spawnFrame.rotation, vecspawnFrame);
-             
+
             MissionObject mObject = Mission.Current.CreateMissionObjectFromPrefab(spawnableItem.PrefabName, adjSpawnFrame);
-             
+
             this.SpawnedPrefabs.Add(mObject.GameEntity);
 
             LoggerHelper.LogAnAction(userAgent.MissionPeer.GetNetworkPeer(), LogAction.PlayerSpawnedPrefab, null, new object[] {
@@ -210,9 +210,9 @@ namespace PersistentEmpiresLib.SceneScripts
                 SpawnableItem sItem = this.SpawnableItems.FirstOrDefault(s => s.PrefabName == spawnedEntity.Name);
                 if (sItem.SpawnerItem != null)
                 {
-                    float distance = spawnedEntityOrigin.Distance(spawnerOrigin); 
+                    float distance = spawnedEntityOrigin.Distance(spawnerOrigin);
                     if (distance <= sItem.DespawnArea)
-                    { 
+                    {
                         NetworkCommunicator peer = userAgent.MissionPeer.GetNetworkPeer();
                         PersistentEmpireRepresentative empireRepresentative = peer.GetComponent<PersistentEmpireRepresentative>();
                         if (empireRepresentative.GetInventory().HasEnoughRoomFor(sItem.SpawnerItem, 1))

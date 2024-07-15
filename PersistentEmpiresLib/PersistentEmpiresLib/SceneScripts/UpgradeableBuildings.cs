@@ -284,6 +284,9 @@ namespace PersistentEmpiresLib.SceneScripts
             MissionWeapon missionWeapon = weapon;
             WeaponComponentData currentUsageItem = missionWeapon.CurrentUsageItem;
             if (attackerAgent == null) return false;
+            if(attackerAgent.Controller == Agent.ControllerType.AI || attackerAgent.IsAIControlled ) return false;
+
+
             NetworkCommunicator player = attackerAgent.MissionPeer.GetNetworkPeer();
             bool isAdmin = Main.IsPlayerAdmin(player);
             if (isAdmin && missionWeapon.Item != null && missionWeapon.Item.StringId == "pe_adminhammer")

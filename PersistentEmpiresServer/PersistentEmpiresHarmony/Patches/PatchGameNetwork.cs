@@ -14,8 +14,11 @@ namespace PersistentEmpiresHarmony.Patches
         public static event HandleServerEventCreatePlayerHandler OnHandleServerEventCreatePlayer;
         public static bool PrefixAddNewPlayerOnServer(ref PlayerConnectionInfo playerConnectionInfo, bool serverPeer, bool isAdmin)
         {
-            if (OnAddNewPlayerOnServer != null) OnAddNewPlayerOnServer(ref playerConnectionInfo, serverPeer, isAdmin);
-            File.AppendAllText("network.txt", "== Add New Player " + playerConnectionInfo.Name + " ==\n");
+            if (playerConnectionInfo != null)
+            {
+                if (OnAddNewPlayerOnServer != null) OnAddNewPlayerOnServer(ref playerConnectionInfo, serverPeer, isAdmin); 
+                File.AppendAllText("network.txt", "== Add New Player " + playerConnectionInfo.Name + " ==\n");
+            }
 
             return true;
         }

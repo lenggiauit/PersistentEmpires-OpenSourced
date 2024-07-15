@@ -147,7 +147,7 @@ namespace PersistentEmpiresClient.ViewsVM
                 dynamic item = ItemsList[i];
                 if (this.NameFilter != null && this.NameFilter != "" && !item.Item.Name.ToString().ToLower().Contains(this.NameFilter.ToLower())) continue;
                 if (stockFilter != null && (((bool)stockFilter && !(item.Stock > 0)) || (!(bool)stockFilter && (item.Stock != 0)))) continue;
-                if (cultureFilter != null && item.Item.Culture.StringId != cultureFilter) continue;
+                if (cultureFilter != null && item.Item.Culture?.StringId != cultureFilter) continue;
                 if (tierFilter != null && item.Tier != tierFilter) continue;
                 if (itemTypeFilter != null && item.Item.Type != itemTypeFilter) continue;
 

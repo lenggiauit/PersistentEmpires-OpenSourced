@@ -74,38 +74,29 @@ namespace PersistentEmpiresLib.Helpers
             return found; 
         }
 
-
         public static bool HasClosestToDistanceAsVec2(List<Vec3> vecS1, List<Vec3> vecS2, float targetDistance)
         {
-            bool found = false;
-
-            for (int i = 0, j = vecS1.Count() - 1; i < j; i++, j--)
+            for (int i = 0, j = vecS1.Count - 1; i < j; i++, j--)
             {
-
-                for (int x = 0, y = vecS2.Count() - 1; x < y; x++, y--)
+                for (int x = 0, y = vecS2.Count - 1; x < y; x++, y--)
                 {
-                    if (
-                        vecS1[i].AsVec2.Distance(vecS2[x].AsVec2) < targetDistance ||
-                        vecS1[j].AsVec2.Distance(vecS2[x].AsVec2) < targetDistance ||
-
-                        vecS1[i].AsVec2.Distance(vecS2[y].AsVec2) < targetDistance ||
-                        vecS1[j].AsVec2.Distance(vecS2[y].AsVec2) < targetDistance
-                        )
+                    if (IsWithinTargetDistance(vecS1[i], vecS2[x], targetDistance) ||
+                        IsWithinTargetDistance(vecS1[j], vecS2[x], targetDistance) ||
+                        IsWithinTargetDistance(vecS1[i], vecS2[y], targetDistance) ||
+                        IsWithinTargetDistance(vecS1[j], vecS2[y], targetDistance))
                     {
-                        found = true;
-                        break;
+                        return true;
                     }
-
                 }
-                if (found)
-                {
-                    break;
-                }
-
             }
-
-            return found; 
+            return false;
         }
+
+        private static bool IsWithinTargetDistance(Vec3 vec1, Vec3 vec2, float targetDistance)
+        {
+            return vec1.AsVec2.Distance(vec2.AsVec2) < targetDistance;
+        }
+
 
         public static List<Vec3> GetCollisionCheckPoints(GameEntity gameEntity, string collisionCheckPointTag)
         {

@@ -61,7 +61,7 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
                 }
                 else
                 {
-                    persistentEmpireRepresentative.SetSpawnFrame(frame);
+            persistentEmpireRepresentative.SetSpawnFrame(frame);
                    // Debug.Print("**  prisonFactionIndex prisonFactionIndex prisonFactionIndex is null: " + ( persistentEmpireRepresentative.IsPrisoner? "Prisoner" : ""), 0, Debug.DebugColor.Red);
                 }
 

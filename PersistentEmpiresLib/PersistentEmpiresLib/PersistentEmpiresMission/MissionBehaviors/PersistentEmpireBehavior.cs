@@ -37,9 +37,9 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
         private long lastPolledAt = 0;
         private bool registered = false;
         public bool agentLabelEnabled = true;
-        public override bool IsGameModeHidingAllAgentVisuals => true;
+        public override bool IsGameModeHidingAllAgentVisuals => false;
 
-        public override bool IsGameModeUsingOpposingTeams => false;
+        public override bool IsGameModeUsingOpposingTeams => true;
         public string ServerSignature;
 
         // public static string ServerSignature = "";
@@ -66,7 +66,7 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
 
         public override MultiplayerGameType GetMissionType()
         {
-            return MultiplayerGameType.FreeForAll;
+            return MultiplayerGameType.Battle;
         }
         protected override void HandleEarlyNewClientAfterLoadingFinished(NetworkCommunicator networkPeer)
         {

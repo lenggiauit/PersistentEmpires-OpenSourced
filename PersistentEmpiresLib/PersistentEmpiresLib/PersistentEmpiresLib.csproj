@@ -83,6 +83,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
+    <Reference Include="TaleWorlds.CampaignSystem">
+      <HintPath>ServerReferences\TaleWorlds.CampaignSystem.dll</HintPath>
+    </Reference>
     <Reference Include="WindowsBase" />
     <!-- Dlls
     ONLY in Shipping Sever -->
@@ -345,6 +348,7 @@
     <Compile Include="PersistentEmpiresMission\MissionBehaviors\PoisoningBehavior.cs" />
     <Compile Include="PersistentEmpiresMission\MissionBehaviors\ProximityChatComponent.cs" />
     <Compile Include="PersistentEmpiresMission\MissionBehaviors\SaveSystemBehavior.cs" />
+    <Compile Include="PersistentEmpiresMission\MissionBehaviors\SpawnBotBehavior.cs" />
     <Compile Include="PersistentEmpiresMission\MissionBehaviors\SpawnFrameSelectionBehavior.cs" />
     <Compile Include="PersistentEmpiresMission\MissionBehaviors\StockpileMarketComponent.cs" />
     <Compile Include="PersistentEmpiresMission\MissionBehaviors\TradingCenterBehavior.cs" />

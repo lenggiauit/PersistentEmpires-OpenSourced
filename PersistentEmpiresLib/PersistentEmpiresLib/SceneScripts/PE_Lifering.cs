@@ -230,7 +230,7 @@ namespace PersistentEmpiresLib.SceneScripts
                     if (this.PilotAgent != null)
                     {
                         this.CheckInTheWater(oldFrame);
-                        this.checkHittingObject(oldFrame);
+                        //this.checkHittingObject(oldFrame);
                     }
                     if (base.GameEntity.GlobalPosition.Z >= Mission.Current.Scene.GetWaterLevel() - waterLevelAdj)
                     {
@@ -381,6 +381,7 @@ namespace PersistentEmpiresLib.SceneScripts
             try
             {
                 reportDamage = true;
+                if (attackerAgent.Controller == Agent.ControllerType.AI || attackerAgent.IsAIControlled) { return false; }
                 MissionWeapon missionWeapon = weapon; 
                 if (impactDirection == null) impactDirection = Vec3.Zero; 
                 this.SetHitPoint(this.HitPoint - damage, impactDirection);

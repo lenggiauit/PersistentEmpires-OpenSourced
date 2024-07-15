@@ -208,7 +208,7 @@ namespace PersistentEmpiresLib.SceneScripts
 
         public override void OnUse(Agent userAgent)
         {
-
+            if (userAgent.Controller == Agent.ControllerType.AI || userAgent.IsAIControlled) return;
             if (GameNetwork.IsServer)
             {
                 Debug.Print("[USING LOG] AGENT USE " + this.GetType().Name);

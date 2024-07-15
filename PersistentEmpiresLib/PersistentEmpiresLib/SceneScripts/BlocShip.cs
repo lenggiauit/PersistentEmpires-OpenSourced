@@ -563,6 +563,7 @@ namespace PersistentEmpiresLib.SceneScripts
             try
             { 
                 reportDamage = true;
+                if (attackerAgent.Controller == Agent.ControllerType.AI || attackerAgent.IsAIControlled) { return false; }
                 MissionWeapon missionWeapon = weapon;
                 WeaponComponentData currentUsageItem = missionWeapon.CurrentUsageItem;
                 if (

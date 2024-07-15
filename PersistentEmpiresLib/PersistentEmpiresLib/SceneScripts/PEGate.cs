@@ -55,6 +55,7 @@ namespace PersistentEmpiresLib.SceneScripts
         }
         public override void OnUse(Agent userAgent)
         {
+            if (userAgent.Controller == Agent.ControllerType.AI || userAgent.IsAIControlled) return;
             if (!base.IsUsable(userAgent))
             {
                 userAgent.StopUsingGameObjectMT(false);
@@ -122,6 +123,7 @@ namespace PersistentEmpiresLib.SceneScripts
         protected override bool OnHit(Agent attackerAgent, int damage, Vec3 impactPosition, Vec3 impactDirection, in MissionWeapon weapon, ScriptComponentBehavior attackerScriptComponentBehavior, out bool reportDamage)
         {
             reportDamage = false;
+            if (attackerAgent.Controller == Agent.ControllerType.AI || attackerAgent.IsAIControlled) { return false; }
             if (this.Lockpickable == false) return false;
             if (this.CastleId == -1) return false;
 

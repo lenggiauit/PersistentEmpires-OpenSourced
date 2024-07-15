@@ -173,6 +173,7 @@ namespace PersistentEmpiresLib.SceneScripts
 
         public override void OnUse(Agent userAgent)
         {
+            if (userAgent.Controller == Agent.ControllerType.AI || userAgent.IsAIControlled) return;
             if (!base.IsUsable(userAgent))
             {
                 userAgent.StopUsingGameObjectMT(false);
@@ -215,6 +216,7 @@ namespace PersistentEmpiresLib.SceneScripts
         {
             reportDamage = false;
             if (attackerAgent == null) return false;
+            if (attackerAgent.Controller == Agent.ControllerType.AI || attackerAgent.IsAIControlled) return false;
             NetworkCommunicator player = attackerAgent.MissionPeer.GetNetworkPeer();
             bool isAdmin = Main.IsPlayerAdmin(player);
             if (isAdmin && weapon.Item != null && weapon.Item.StringId == "pe_adminstockfiller")
