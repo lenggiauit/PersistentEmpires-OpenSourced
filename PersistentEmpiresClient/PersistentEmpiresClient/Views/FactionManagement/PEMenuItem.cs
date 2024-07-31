@@ -1,4 +1,5 @@
 ﻿using PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors;
+using System;
 using TaleWorlds.Engine.GauntletUI;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade.View.MissionViews;
@@ -13,6 +14,12 @@ namespace PersistentEmpires.Views.Views.FactionManagement
         protected GauntletLayer _gauntletLayer;
         protected string _screenName;
         public bool IsActive { get; protected set; }
+
+        public long applicationId = 1220322074581798942; 
+        public Discord.Discord discord; 
+        public bool DiscordNotWorks = false;
+
+
         public PEMenuItem(string screenName)
         {
             this._screenName = screenName;
@@ -25,8 +32,19 @@ namespace PersistentEmpires.Views.Views.FactionManagement
             this._factionManagementComponent = base.Mission.GetMissionBehavior<FactionUIComponent>();
             this._factionsBehavior = base.Mission.GetMissionBehavior<FactionsBehavior>();
 
+            //try
+            //{
+            //    discord = new Discord.Discord(applicationId, (System.UInt64)Discord.CreateFlags.NoRequireDiscord); 
+            //}
+            //catch 
+            //{ 
+            //    this.DiscordNotWorks = true;
+            //}
+
             // this._dataSource = this.GetDataSource();
         }
+         
+
         public override bool OnEscape()
         {
             bool result = base.OnEscape();
@@ -51,6 +69,18 @@ namespace PersistentEmpires.Views.Views.FactionManagement
             this._gauntletLayer.InputRestrictions.SetInputRestrictions(true, InputUsageMask.Mouse);
             base.MissionScreen.AddLayer(this._gauntletLayer);
             this.IsActive = true;
+
+            //if (this.DiscordNotWorks)
+            //{
+            //    try
+            //    {
+            //        discord.RunCallbacks();
+            //    }
+            //    catch  
+            //    {
+            //        this.DiscordNotWorks = false;
+            //    }
+            //}
         }
     }
 }

@@ -1,40 +1,49 @@
-﻿using PersistentEmpiresLib.Helpers; 
+﻿using PersistentEmpiresLib.Helpers;
 using PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors;
 using PersistentEmpiresLib.SceneScripts.Extensions;
+using PersistentEmpiresLib.SceneScripts.Interfaces;
 using System;
-using System.Collections.Generic; 
-using System.Linq; 
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using TaleWorlds.Core;
 using TaleWorlds.Engine;
 using TaleWorlds.InputSystem;
 using TaleWorlds.Library;
 using TaleWorlds.Localization;
 using TaleWorlds.MountAndBlade;
+using Debug = TaleWorlds.Library.Debug;
 using Utilities = PersistentEmpiresLib.Helpers.Utilities;
 
 namespace PersistentEmpiresLib.SceneScripts
 {
     public class PE_Lifering : PE_MoveableMachine
-    {   
+    {
         public bool isPlayerUsing = false;
         public string Animation = "";
-        public int StrayDurationSeconds = 7200;   
-        public string ParticleEffectOnDestroy = "psys_game_wooden_merlon_destruction"; 
-        public string ParticleEffectOnWater = "psys_game_water_splash_2"; 
+        public int StrayDurationSeconds = 5;
+        public int LiferingStrayDurationSeconds = 10;
+        public string ParticleEffectOnDestroy = "psys_game_wooden_merlon_destruction";
+        public string ParticleEffectOnWater = "psys_game_water_splash_2";
         public string SoundEffectOnDestroy = "";
         public string ParticleEffectOnRepair = "";
         public string SoundEffectOnRepair = "";
         public string CollisionCheckPointTag = "collision_check_point";
-        public bool DestroyedByStoneOnly = false; 
-        private long WillBeDeletedAt = 0; 
+        public bool DestroyedByStoneOnly = false;
+        private long WillBeDeletedAt = 0;
         private bool destroyed = false;
         private float defaultShipCollisionDistance = 0.1f;
         private bool isHitting = false;
-        
+
+        private long WillAbleElevate = 0;
+        private int ElevateDurationSeconds = 1;
+        private int MaxElevateRequest = 10;
+        private int ElevateRequestCount = 0;
+
         private float waterLevelAdj = ConfigManager.GetFloatConfig("WaterLevelAdj", 0.5f);
 
         private bool CheckCanElevate()
-        {    
+        {
             if (base.GameEntity.GlobalPosition.Z >= Mission.Current.Scene.GetWaterLevel() - waterLevelAdj)
             {
                 return false;
@@ -42,31 +51,42 @@ namespace PersistentEmpiresLib.SceneScripts
             else
             {
                 return true;
-            } 
+            }
         }
 
         public override ScriptComponentBehavior.TickRequirement GetTickRequirement() => !this.GameEntity.IsVisibleIncludeParents() ? base.GetTickRequirement() : ScriptComponentBehavior.TickRequirement.Tick | ScriptComponentBehavior.TickRequirement.TickParallel;
-         
-        private void CheckInTheWater(MatrixFrame oldFrame) 
+
+        private void CheckInTheWater(MatrixFrame oldFrame)
         {
             if (base.GameEntity == null) return;
             if (oldFrame == null) return;
             if (!CheckCanElevate())
-            { 
+            {
                 if (this.IsMovingDown)
                 {
                     this.StopMovingDown();
                     base.GameEntity.SetFrame(ref oldFrame);
-                } 
+                }
                 if (this.IsMovingUp)
                 {
                     this.StopMovingUp();
                     base.GameEntity.SetFrame(ref oldFrame);
-                } 
+                }
             }
             CanElevate = CheckCanElevate();
         }
-         
+
+        private void CheckIfLanded(MatrixFrame oldFrame)
+        { 
+            if (base.GameEntity == null) return;
+            if (oldFrame == null) return;
+            float heightUnder = Mission.Current.Scene.GetTerrainHeight(this.GameEntity.GlobalPosition.AsVec2, true);
+            if (base.GameEntity.GlobalPosition.Z - heightUnder <= 0.2f)
+            {  
+                this.destroyed = true; 
+            }
+        }
+
 
         private void checkHittingObject(MatrixFrame oldFrame)
         {
@@ -76,7 +96,7 @@ namespace PersistentEmpiresLib.SceneScripts
 
             List<GameEntity> listEntity = new List<GameEntity>();
             Vec3 entityOrigin = this.GameEntity.GetGlobalFrame().origin;
-            Mission.Current.Scene.GetAllEntitiesWithScriptComponent<PE_Lifering>(ref listEntity); 
+            Mission.Current.Scene.GetAllEntitiesWithScriptComponent<PE_Lifering>(ref listEntity);
 
             listEntity = listEntity.Where(e => entityOrigin.Distance(e.GetGlobalFrame().origin) <= 20 && e != this.GameEntity).ToList();
 
@@ -85,10 +105,10 @@ namespace PersistentEmpiresLib.SceneScripts
             if (listEntity.Count > 0)
             {
                 if (this.PilotAgent != null)
-                {  
+                {
                     foreach (GameEntity entity in listEntity)
-                    { 
-                        List<Vec3> entityCheckPointList = Utilities.GetCollisionCheckPoints(entity, CollisionCheckPointTag); 
+                    {
+                        List<Vec3> entityCheckPointList = Utilities.GetCollisionCheckPoints(entity, CollisionCheckPointTag);
                         if (Helpers.Utilities.HasClosestToDistanceAsVec2(currentEntityCheckPointList, entityCheckPointList, defaultShipCollisionDistance))
                         {
                             if (this.IsMovingBackward)
@@ -133,7 +153,7 @@ namespace PersistentEmpiresLib.SceneScripts
 
             }
         }
-         
+
 
         protected override void OnTick(float dt)
         {
@@ -142,13 +162,7 @@ namespace PersistentEmpiresLib.SceneScripts
                 if (base.GameEntity == null) return;
                 MatrixFrame oldFrame = base.GameEntity.GetFrame();
                 base.OnTick(dt);
-                if (GameNetwork.IsServer)
-                {
-                    if (this.PilotAgent != null)
-                    { 
-                        this.ResetStrayDuration();
-                    }
-                }
+                 
 
                 if (GameNetwork.IsClient)
                 {
@@ -209,10 +223,10 @@ namespace PersistentEmpiresLib.SceneScripts
                             this.isPlayerUsing = false;
                             ActionIndexCache ac = ActionIndexCache.act_none;
                             this.PilotAgent.SetActionChannel(0, ac, true, 0UL, 0.0f, 1f, -0.2f, 0.4f, 0, false, -0.2f, 0, true);
-                            isHitting = false; 
+                            isHitting = false;
 
                         }
-                        
+
                     }
                 }
 
@@ -226,12 +240,17 @@ namespace PersistentEmpiresLib.SceneScripts
                     if (base.IsTurningRight) this.StopTurningRight();
                 }
                 if (GameNetwork.IsServer)
-                {  
+                { 
+                    if (this.PilotAgent == null && this.WillBeDeletedAt < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
+                    { 
+                        this.destroyed = true; 
+                    }  
                     if (this.PilotAgent != null)
                     {
-                        this.CheckInTheWater(oldFrame);
-                        //this.checkHittingObject(oldFrame);
+                        this.CheckInTheWater(oldFrame);  
+                        this.ResetStrayDuration(); 
                     }
+                    
                     if (base.GameEntity.GlobalPosition.Z >= Mission.Current.Scene.GetWaterLevel() - waterLevelAdj)
                     {
                         Vec3 vec3 = base.GameEntity.GetGlobalFrame().origin;
@@ -240,29 +259,30 @@ namespace PersistentEmpiresLib.SceneScripts
                     }
                 }
 
-                if (GameNetwork.IsClient)
-                {
-                    if (CheckCanElevate() && this.PilotAgent != null)
-                    {
-                        this.RequestMovingUp();
-                    }
-                    else
-                    {
-                        this.RequestStopMovingUp(); 
-                    }
-                    //UpdateParticle();
-                }
-                  
+                //if (GameNetwork.IsClient)
+                //{
+                //    if (CheckCanElevate() && this.PilotAgent != null)
+                //    {
+                //        if (IsAbleElevate())
+                //        {
+                //            this.RequestMovingUp();
+                //            this.ResetRequestElevateDuration();
+                //            ElevateRequestCount++;
+                //            Debug.Print("[ PE_Lifering - ElevateRequestCount]: {0}" + ElevateRequestCount);
+                //        }
+                //    } 
+                //}
+
                 if (destroyed)
-                { 
+                {
                     Mission.Current.AddParticleSystemBurstByName("psys_game_wooden_merlon_destruction", this.GameEntity.GetGlobalFrame(), true);
                     base.GameEntity.Remove(0);
-                    destroyed = false; 
+                    destroyed = false;
                 }
             }
             catch (Exception ex)
-            { 
-                Debug.PrintError(string.Format("[ERROR PE_Lifering]: {0}", ex.Message));  
+            {
+                Debug.PrintError(string.Format("[ERROR PE_Lifering]: {0}", ex.Message));
             }
         }
 
@@ -284,7 +304,7 @@ namespace PersistentEmpiresLib.SceneScripts
                 }
             }
         }
-         
+
 
         protected override void OnTickParallel(float dt)
         {
@@ -301,9 +321,9 @@ namespace PersistentEmpiresLib.SceneScripts
             {
                 standingPoint.AutoSheathWeapons = true;
             }
-             
+
             this.ResetStrayDuration();
-            this.HitPoint = this.MaxHitPoint; 
+            this.HitPoint = this.MaxHitPoint;
         }
         public bool IsAgentFullyUsing(Agent usingAgent)
         {
@@ -319,20 +339,33 @@ namespace PersistentEmpiresLib.SceneScripts
 
         public override string GetDescriptionText(GameEntity gameEntity = null)
         {
-            
+
             return new TextObject("{zAK15Sy2} Lifering").ToString();
-            
+
         }
 
         public override bool IsStray()
         {
-            if (this.PilotAgent != null) return false;
+            if (this.PilotAgent != null) return false; 
             return this.WillBeDeletedAt < DateTimeOffset.UtcNow.ToUnixTimeSeconds();
         }
 
+         
         public override void ResetStrayDuration()
         {
-            this.WillBeDeletedAt = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + this.StrayDurationSeconds;
+            this.WillBeDeletedAt = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + this.LiferingStrayDurationSeconds;
+        }
+
+
+        public bool IsAbleElevate()
+        {
+            if (this.PilotAgent != null) return false;
+            return this.WillAbleElevate < DateTimeOffset.UtcNow.ToUnixTimeSeconds() && ElevateRequestCount <= MaxElevateRequest;
+        }
+
+        private void ResetRequestElevateDuration()
+        {
+            this.WillAbleElevate = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + this.ElevateDurationSeconds;
         }
 
         public override void SetHitPoint(float hitPoint, Vec3 impactDirection)
@@ -359,7 +392,7 @@ namespace PersistentEmpiresLib.SceneScripts
                     Mission.Current.MakeSound(SoundEvent.GetEventIdFromString(this.SoundEffectOnDestroy), globalFrame.origin, false, true, -1, -1);
                 }
 
-                this.destroyed = true; 
+                this.destroyed = true;
 
             }
             if (this.HitPoint == this.MaxHitPoint)
@@ -382,10 +415,10 @@ namespace PersistentEmpiresLib.SceneScripts
             {
                 reportDamage = true;
                 if (attackerAgent.Controller == Agent.ControllerType.AI || attackerAgent.IsAIControlled) { return false; }
-                MissionWeapon missionWeapon = weapon; 
-                if (impactDirection == null) impactDirection = Vec3.Zero; 
+                MissionWeapon missionWeapon = weapon;
+                if (impactDirection == null) impactDirection = Vec3.Zero;
                 this.SetHitPoint(this.HitPoint - damage, impactDirection);
-                isHitting = true;  
+                isHitting = true;
                 NetworkCommunicator player = attackerAgent.MissionPeer.GetNetworkPeer();
                 PersistentEmpireRepresentative persistentEmpireRepresentative = player.GetComponent<PersistentEmpireRepresentative>();
                 InformationComponent.Instance.SendMessage("Lifering health: " + HitPoint, new Color(1f, 0, 0).ToUnsignedInteger(), persistentEmpireRepresentative.MissionPeer.GetNetworkPeer());
@@ -393,7 +426,7 @@ namespace PersistentEmpiresLib.SceneScripts
                 if (GameNetwork.IsServer)
                 {
                     LoggerHelper.LogAnAction(attackerAgent.MissionPeer.GetNetworkPeer(), LogAction.PlayerHitToDestructable, null, new object[] { this.GetType().Name });
-                } 
+                }
                 return false;
             }
             catch (Exception e)

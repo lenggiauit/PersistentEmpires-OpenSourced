@@ -96,13 +96,13 @@ namespace PersistentEmpiresLib.NetworkMessages.Client
         protected override bool OnRead()
         {
             bool result = true;
-            this.FactionIndex = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(-1, 200, true), ref result);
+            this.FactionIndex = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(-1, 300, true), ref result);
             return result;
         }
 
         protected override void OnWrite()
         {
-            GameNetworkMessage.WriteIntToPacket(this.FactionIndex, new CompressionInfo.Integer(-1, 200, true));
+            GameNetworkMessage.WriteIntToPacket(this.FactionIndex, new CompressionInfo.Integer(-1, 300, true));
         }
     }
     [DefineGameNetworkMessageTypeForMod(GameNetworkMessageSendType.FromClient)]
@@ -131,13 +131,13 @@ namespace PersistentEmpiresLib.NetworkMessages.Client
         protected override bool OnRead()
         {
             bool result = true;
-            this.FactionIndex = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(-1, 200, true), ref result);
+            this.FactionIndex = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(-1, 300, true), ref result);
             return result;
         }
 
         protected override void OnWrite()
         {
-            GameNetworkMessage.WriteIntToPacket(this.FactionIndex, new CompressionInfo.Integer(-1, 200, true));
+            GameNetworkMessage.WriteIntToPacket(this.FactionIndex, new CompressionInfo.Integer(-1, 300, true));
         }
     }
 
@@ -169,14 +169,14 @@ namespace PersistentEmpiresLib.NetworkMessages.Client
         protected override bool OnRead()
         {
             bool result = true;
-            this.FactionIndex = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(-1, 200, true), ref result);
+            this.FactionIndex = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(-1, 300, true), ref result);
             this.FactionName = GameNetworkMessage.ReadStringFromPacket(ref result);
             return result;
         }
 
         protected override void OnWrite()
         {
-            GameNetworkMessage.WriteIntToPacket(this.FactionIndex, new CompressionInfo.Integer(-1, 200, true));
+            GameNetworkMessage.WriteIntToPacket(this.FactionIndex, new CompressionInfo.Integer(-1, 300, true));
             GameNetworkMessage.WriteStringToPacket(this.FactionName);
         }
     }
@@ -558,6 +558,41 @@ namespace PersistentEmpiresLib.NetworkMessages.Client
         protected override string OnGetLogFormat()
         {
             return "Received RequestPrison";
+        }
+
+        protected override bool OnRead()
+        {
+            bool result = true;
+            this.Player = GameNetworkMessage.ReadNetworkPeerReferenceFromPacket(ref result, true);
+            return result;
+        }
+
+        protected override void OnWrite()
+        {
+            GameNetworkMessage.WriteNetworkPeerReferenceToPacket(this.Player);
+        }
+    }
+
+
+    // Prison Release
+    [DefineGameNetworkMessageTypeForMod(GameNetworkMessageSendType.FromClient)]
+    public sealed class RequestPrisonerRelease : GameNetworkMessage
+    {
+        public NetworkCommunicator Player;
+        public RequestPrisonerRelease() { }
+        public RequestPrisonerRelease(NetworkCommunicator player)
+        {
+            this.Player = player;
+        }
+
+        protected override MultiplayerMessageFilter OnGetLogFilter()
+        {
+            return MultiplayerMessageFilter.Administration;
+        }
+
+        protected override string OnGetLogFormat()
+        {
+            return "Received RequestPrisonerRelease";
         }
 
         protected override bool OnRead()

@@ -4,6 +4,7 @@ using PersistentEmpiresLib.Helpers;
 using PersistentEmpiresLib.NetworkMessages.Client;
 using PersistentEmpiresLib.NetworkMessages.Server;
 using PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors;
+using PersistentEmpiresLib.SceneScripts;
 using PersistentEmpiresMission.MissionBehaviors;
 using System;
 using System.Collections.Generic;
@@ -214,7 +215,8 @@ namespace PersistentEmpiresServer.ServerMissions
                 networkMessageHandlerRegisterer.Register<RequestHeal>(this.HandleRequestHealFromClient);
                 networkMessageHandlerRegisterer.Register<RequestUnWound>(this.HandleRequestunWoundFromClient);
                 // 
-                networkMessageHandlerRegisterer.Register<RequestPrison>(this.HandleRequestPrisonFromClient); 
+                networkMessageHandlerRegisterer.Register<RequestPrison>(this.HandleRequestPrisonFromClient);
+                networkMessageHandlerRegisterer.Register<RequestPrisonerRelease>(this.HandleRequestPrisonerReleaseFromClient);
                 //
                 networkMessageHandlerRegisterer.Register<RequestItemSpawn>(this.HandleRequestItemSpawn);
                 networkMessageHandlerRegisterer.Register<RequestAdminJoinFaction>(this.HandleRequestAdminJoinFaction);
@@ -260,7 +262,7 @@ namespace PersistentEmpiresServer.ServerMissions
                 BasicCharacterObject bco = MBObjectManager.Instance.GetObject<BasicCharacterObject>(persistentEmpireRepresentative.GetClassId());
                 AgentHelpers.RespawnAgentOnPlaceForFaction(player.ControlledAgent, persistentEmpireRepresentative.GetFaction(), null, bco);
                 player.ControlledAgent.BaseHealthLimit = 200 + +AgentHelpers.GetConfigCharacterAdjustHealth();
-                player.ControlledAgent.Health = 200 + AgentHelpers.GetConfigCharacterAdjustHealth();
+                player.ControlledAgent.Health = 200 + AgentHelpers.GetConfigCharacterAdjustHealth(); 
                 LoggerHelper.LogAnAction(player, LogAction.PlayerClassChange, null, new object[] {
                     bco
                 });
@@ -270,6 +272,7 @@ namespace PersistentEmpiresServer.ServerMissions
                 AgentHelpers.RespawnAgentOnPlaceForFaction(player.ControlledAgent, persistentEmpireRepresentative.GetFaction(), null, godlike);
                 player.ControlledAgent.BaseHealthLimit = 2000;
                 player.ControlledAgent.Health = 2000;
+               
                 LoggerHelper.LogAnAction(player, LogAction.PlayerBecomesGodlike);
 
             }
@@ -703,13 +706,81 @@ namespace PersistentEmpiresServer.ServerMissions
             } 
             //
 
-            LoggerHelper.LogAnAction(admin, LogAction.PlayerHealedPlayer, new AffectedPlayer[] { new AffectedPlayer(message.Player) });
+            LoggerHelper.LogAnAction(admin, LogAction.PrisonerPlayer, new AffectedPlayer[] { new AffectedPlayer(message.Player) });
 
             return true;
         }
 
 
-          
+        public bool HandleRequestPrisonerReleaseFromClient(NetworkCommunicator admin, RequestPrisonerRelease message)
+        {
+            PersistentEmpireRepresentative persistentEmpireRepresentative = admin.GetComponent<PersistentEmpireRepresentative>();
+            if (!persistentEmpireRepresentative.IsAdmin)
+            {
+                return false;
+            }
+            if (message.Player == null)
+            {
+                return false;
+            }
+            if (message.Player.ControlledAgent == null || !message.Player.ControlledAgent.IsActive())
+            {
+                InformationComponent.Instance.SendMessage("Target is not spawned yet", new Color(1f, 0f, 0f).ToUnsignedInteger(), message.Player);
+                return false;
+            }
+
+            //  commoners  
+            PersistentEmpireRepresentative playerPE = message.Player.GetComponent<PersistentEmpireRepresentative>();
+
+            // set player faction to commoners
+            factionsBehavior.SetPlayerFaction(message.Player, 0, -1);
+            playerPE.IsPrisoner = false;
+            //
+             
+            Vec3 targetPos = GetTeleportPositionFrame(playerPE);
+
+            if (message.Player.ControlledAgent.MountAgent == null)
+            {
+                message.Player.ControlledAgent.TeleportToPosition(targetPos);
+            }
+            else
+            {
+                message.Player.ControlledAgent.MountAgent.TeleportToPosition(targetPos);
+            }
+            // 
+            LoggerHelper.LogAnAction(admin, LogAction.PrisonerRelease, new AffectedPlayer[] { new AffectedPlayer(message.Player) });
+
+            return true;
+        }
+
+
+        private Vec3 GetTeleportPositionFrame(PersistentEmpireRepresentative persistentEmpireRepresentative)
+        {  
+            PE_SpawnFrame frame;
+            if (persistentEmpireRepresentative == null)
+            {
+                frame = base.Mission.GetMissionBehavior<SpawnFrameSelectionBehavior>().DefaultSpawnFrames[0];
+            }
+            else if (persistentEmpireRepresentative.GetNextSpawnFrame() == null)
+            {
+                List<PE_SpawnFrame> spawnable = persistentEmpireRepresentative.GetSpawnableCastleFrames();
+                if (spawnable.Count > 0)
+                {
+                    frame = spawnable[0];
+                }
+                else
+                {
+                    frame = base.Mission.GetMissionBehavior<SpawnFrameSelectionBehavior>().DefaultSpawnFrames[0];
+                }
+            }
+            else
+            {
+                frame = persistentEmpireRepresentative.GetNextSpawnFrame();
+                if (frame.GetCastleBanner() != null && frame.GetCastleBanner().FactionIndex != persistentEmpireRepresentative.GetFactionIndex()) frame = base.Mission.GetMissionBehavior<SpawnFrameSelectionBehavior>().DefaultSpawnFrames[0];
+            }
+            return frame.GameEntity.GetGlobalFrame().origin;
+        }
+         
 
         public bool HandleAddBotFromClient(NetworkCommunicator admin)
         {

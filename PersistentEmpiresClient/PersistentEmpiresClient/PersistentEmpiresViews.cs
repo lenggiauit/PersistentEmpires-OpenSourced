@@ -74,8 +74,8 @@ namespace PersistentEmpires.Views
             list.Add(new PEChatBox());
             // list.Add(new SentryMissionView());
             list.Add(MultiplayerViewCreator.CreateMultiplayerMissionDeathCardUIHandler(null));
-            list.Add(new DVSDiscordRoleView());
-            list.Add(new PEShipCannonViewController());
+            //list.Add(new DVSDiscordRoleView());
+            //list.Add(new PEShipCannonViewController());
 
             return list.ToArray();
         }

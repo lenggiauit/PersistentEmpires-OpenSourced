@@ -27,15 +27,15 @@ namespace PersistentEmpiresLib.NetworkMessages.Server
         protected override bool OnRead()
         {
             bool result = true;
-            this.WarDeclarerIndex = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(0, 200, true), ref result);
-            this.WarDeclaredTo = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(0, 200, true), ref result);
+            this.WarDeclarerIndex = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(0, 300, true), ref result);
+            this.WarDeclaredTo = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(0, 300, true), ref result);
             return result;
         }
 
         protected override void OnWrite()
         {
-            GameNetworkMessage.WriteIntToPacket(this.WarDeclarerIndex, new CompressionInfo.Integer(0, 200, true));
-            GameNetworkMessage.WriteIntToPacket(this.WarDeclaredTo, new CompressionInfo.Integer(0, 200, true));
+            GameNetworkMessage.WriteIntToPacket(this.WarDeclarerIndex, new CompressionInfo.Integer(0, 300, true));
+            GameNetworkMessage.WriteIntToPacket(this.WarDeclaredTo, new CompressionInfo.Integer(0, 300, true));
         }
     }
 }

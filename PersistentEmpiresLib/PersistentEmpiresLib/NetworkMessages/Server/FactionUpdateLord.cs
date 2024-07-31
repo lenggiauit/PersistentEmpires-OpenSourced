@@ -29,7 +29,7 @@ namespace PersistentEmpiresLib.NetworkMessages.Server
         protected override bool OnRead()
         {
             bool result = true;
-            this.FactionIndex = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(-1, 200, true), ref result);
+            this.FactionIndex = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(-1, 300, true), ref result);
             this.Player = GameNetworkMessage.ReadNetworkPeerReferenceFromPacket(ref result);
 
             return result;
@@ -37,7 +37,7 @@ namespace PersistentEmpiresLib.NetworkMessages.Server
 
         protected override void OnWrite()
         {
-            GameNetworkMessage.WriteIntToPacket(this.FactionIndex, new CompressionInfo.Integer(-1, 200, true));
+            GameNetworkMessage.WriteIntToPacket(this.FactionIndex, new CompressionInfo.Integer(-1, 300, true));
             GameNetworkMessage.WriteNetworkPeerReferenceToPacket(this.Player);
         }
     }

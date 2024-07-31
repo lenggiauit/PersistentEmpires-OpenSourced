@@ -226,6 +226,7 @@
     <Compile Include="SentryForView.cs" />
     <Compile Include="ViewHandler.cs" />
     <Compile Include="ViewsVM\AdminPanel\Buttons\Prison.cs" />
+    <Compile Include="ViewsVM\AdminPanel\Buttons\Release.cs" />
     <Compile Include="ViewsVM\AdminPanel\Buttons\UnWound.cs" />
     <Compile Include="ViewsVM\AdminPanel\Buttons\PEAdminButtonVM.cs" />
     <Compile Include="ViewsVM\AdminPanel\Buttons\Heal.cs" />

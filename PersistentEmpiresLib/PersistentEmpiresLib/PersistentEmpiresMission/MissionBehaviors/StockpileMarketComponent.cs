@@ -6,6 +6,7 @@ using PersistentEmpiresLib.SceneScripts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using TaleWorlds.Library;
 using TaleWorlds.MountAndBlade;
 
@@ -229,7 +230,7 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
         }
 
         public void AutoSaveAllMarkets()
-        {
+        { 
             List<PE_StockpileMarket> markets = base.Mission.GetActiveEntitiesWithScriptComponentOfType<PE_StockpileMarket>().Select(g => g.GetFirstScriptOfType<PE_StockpileMarket>()).ToList();
             foreach (PE_StockpileMarket market in markets)
             {

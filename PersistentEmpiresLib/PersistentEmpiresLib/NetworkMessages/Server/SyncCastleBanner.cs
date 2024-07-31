@@ -29,7 +29,7 @@ namespace PersistentEmpiresLib.NetworkMessages.Server
         {
             bool result = true;
             this.CastleBanner = (PE_CastleBanner)Mission.MissionNetworkHelper.GetMissionObjectFromMissionObjectId(GameNetworkMessage.ReadMissionObjectIdFromPacket(ref result));
-            this.FactionIndex = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(0, 200, true), ref result);
+            this.FactionIndex = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(0, 300, true), ref result);
 
             return result;
         }
@@ -37,7 +37,7 @@ namespace PersistentEmpiresLib.NetworkMessages.Server
         protected override void OnWrite()
         {
             GameNetworkMessage.WriteMissionObjectIdToPacket(this.CastleBanner.Id);
-            GameNetworkMessage.WriteIntToPacket(this.FactionIndex, new CompressionInfo.Integer(0, 200, true));
+            GameNetworkMessage.WriteIntToPacket(this.FactionIndex, new CompressionInfo.Integer(0, 300, true));
         }
     }
 }

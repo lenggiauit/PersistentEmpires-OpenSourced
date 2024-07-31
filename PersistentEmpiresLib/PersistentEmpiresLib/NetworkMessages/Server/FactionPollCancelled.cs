@@ -16,7 +16,7 @@ namespace PersistentEmpiresLib.NetworkMessages.Server
         protected override bool OnRead()
         {
             bool result = true;
-            this.FactionIndex = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(-1, 200), ref result);
+            this.FactionIndex = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(-1, 300), ref result);
 
             return result;
         }
@@ -24,7 +24,7 @@ namespace PersistentEmpiresLib.NetworkMessages.Server
         // Token: 0x060002F8 RID: 760 RVA: 0x000062C6 File Offset: 0x000044C6
         protected override void OnWrite()
         {
-            GameNetworkMessage.WriteIntToPacket(this.FactionIndex, new CompressionInfo.Integer(-1, 200));
+            GameNetworkMessage.WriteIntToPacket(this.FactionIndex, new CompressionInfo.Integer(-1, 300));
         }
 
         // Token: 0x060002F9 RID: 761 RVA: 0x000062C8 File Offset: 0x000044C8

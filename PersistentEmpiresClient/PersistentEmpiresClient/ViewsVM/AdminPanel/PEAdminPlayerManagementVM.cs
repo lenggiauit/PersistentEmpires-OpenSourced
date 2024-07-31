@@ -29,6 +29,7 @@ namespace PersistentEmpires.Views.ViewsVM.AdminPanel
                 new TpTo(),
                 new Heal(),
                 new Prison(),
+                new Release(),
             };
 
             // Config value is just red on server. This cant be used, and making call to check this value feels like overkill

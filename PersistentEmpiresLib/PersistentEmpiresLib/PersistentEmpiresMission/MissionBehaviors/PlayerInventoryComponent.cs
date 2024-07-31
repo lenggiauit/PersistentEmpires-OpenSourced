@@ -158,7 +158,10 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
                             }
                             if (random.Next(100) > this.DestroyChance || killedByFriendly)
                             {
-                                lootInventory.ExpandInventoryWithItem(equipments[i].Item, 1, ammo);
+                                if (!equipments[i].Item.StringId.ToLower().StartsWith( ConfigManager.GetStrConfig("AdminItemPrefix", "dv_")))
+                                {
+                                    lootInventory.ExpandInventoryWithItem(equipments[i].Item, 1, ammo);
+                                } 
                             }
                             else
                             {
@@ -174,7 +177,10 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
 
                     if (random.Next(100) > 5 || killedByFriendly)  // % 10 remove item
                     {
-                        lootInventory.ExpandInventoryWithItem(inventorySlot.Item, inventorySlot.Count, inventorySlot.Ammo);
+                        if (!inventorySlot.Item.StringId.ToLower().StartsWith(ConfigManager.GetStrConfig("AdminItemPrefix", "dv_")))
+                        {
+                            lootInventory.ExpandInventoryWithItem(inventorySlot.Item, inventorySlot.Count, inventorySlot.Ammo);
+                        }
                     }
                     else
                     {
@@ -359,7 +365,7 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
             PersistentEmpireRepresentative persistentEmpireRepresentative = player.GetComponent<PersistentEmpireRepresentative>();
             if (persistentEmpireRepresentative == null) return false;
             if (inventory == "Equipment")
-            {
+            {  
                 Equipment currentEquipment = AgentHelpers.GetCurrentAgentEquipment(player.ControlledAgent);
                 if (currentEquipment[draggedIndex].IsEmpty)
                 {
@@ -388,7 +394,7 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
                 GameNetwork.EndModuleEventAsServer();
             }
             else if (inventory == "PlayerInventory")
-            {
+            { 
                 Inventory sourceInventory = persistentEmpireRepresentative.GetInventory();
                 InventorySlot slot = sourceInventory.Slots[draggedIndex];
                 if (slot.Item == null || slot.Count == 0)
@@ -406,7 +412,7 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
                 GameNetwork.EndModuleEventAsServer();
             }
             else if (this.CustomInventories.ContainsKey(inventory))
-            {
+            { 
                 Inventory sourceInventory = this.CustomInventories[inventory];
                 InventorySlot slot = sourceInventory.Slots[draggedIndex];
                 if (slot.Item == null || slot.Count == 0)
@@ -430,8 +436,10 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
                     GameNetwork.EndModuleEventAsServer();
                 }
             }
-            if (droppedItem == null || droppedCount == 0) return false;
+            if (droppedItem == null || droppedCount == 0 ) return false;
             // Find or create a loot entity
+
+
             PE_InventoryEntity droppedLoot = null;
             foreach (PE_InventoryEntity entity in this.LootableObjects.Values.ToList())
             {
@@ -460,9 +468,11 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
 
                 droppedLoot.AddPhysicsSynchedPE(new Vec3(0, 0, 1), Vec3.Zero, "wood");
             }
+             
             this.CustomInventories[droppedLoot.InventoryId].ExpandInventoryWithItem(droppedItem, droppedCount, droppedAmmo);
+              
             // player.ControlledAgent.Get
-            LoggerHelper.LogAnAction(player, LogAction.PlayerDroppedItem, null, new object[] {
+            LoggerHelper.LogAnAction(player, LogAction.PlayerDroppedItem , null, new object[] {
                 droppedLoot.InventoryId,
                 inventory,
                 droppedItem,

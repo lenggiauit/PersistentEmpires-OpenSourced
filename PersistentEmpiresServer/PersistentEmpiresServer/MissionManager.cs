@@ -41,10 +41,8 @@ namespace PersistentEmpiresServer
                         new CraftingComponent(),
                         new MoneyPouchBehavior(),
                         new StockpileMarketComponent(),
-                        new LocalChatComponent(),
-
-                        new DragonVItemBehavior(),
-
+                        new LocalChatComponent(), 
+                        new DragonVItemBehavior(), 
                         new InstrumentsBehavior(),
                         new CombatlogBehavior(),
                         // new WhitelistBehavior(),
@@ -80,12 +78,11 @@ namespace PersistentEmpiresServer
                         new AnimationBehavior(),
                         new ChatCommandSystem(),
                         new WhitelistBehavior(),
-                        //new AgentHumanAILogic(),
-                        //new AgentCommonAILogic(), 
+                        
                         // new EquipmentControllerLeaveLogic(),
-                        // new MultiplayerPreloadHelper()
-                        //
+                        // new MultiplayerPreloadHelper() 
                        // new DiscordRoleRegistryBehavior()
+                       //new PersonalPropertyBehavior()
 
                 }; 
 

@@ -58,6 +58,7 @@ namespace PersistentEmpires.Views.Views
                 return;
             }
             discord.GetUserManager().OnCurrentUserUpdate += this.OnCurrentUserUpdate;
+           
         }
 
         private void OnCurrentUserUpdate()

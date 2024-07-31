@@ -38,7 +38,7 @@ namespace PersistentEmpiresLib.NetworkMessages.Server
             bool result = true;
             this.TargetPlayer = GameNetworkMessage.ReadNetworkPeerReferenceFromPacket(ref result);
             this.Accepted = GameNetworkMessage.ReadBoolFromPacket(ref result);
-            this.FactionIndex = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(-1, 200), ref result);
+            this.FactionIndex = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(-1, 300), ref result);
 
 
             return result;
@@ -48,7 +48,7 @@ namespace PersistentEmpiresLib.NetworkMessages.Server
         {
             GameNetworkMessage.WriteNetworkPeerReferenceToPacket(this.TargetPlayer);
             GameNetworkMessage.WriteBoolToPacket(this.Accepted);
-            GameNetworkMessage.WriteIntToPacket(this.FactionIndex, new CompressionInfo.Integer(-1, 200));
+            GameNetworkMessage.WriteIntToPacket(this.FactionIndex, new CompressionInfo.Integer(-1, 300));
         }
     }
 }

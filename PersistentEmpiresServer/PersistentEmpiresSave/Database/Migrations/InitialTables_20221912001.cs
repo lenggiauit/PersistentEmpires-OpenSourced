@@ -132,6 +132,14 @@ namespace PersistentEmpiresSave.Database.Migrations
                 .WithColumn("CreatedAt").AsDateTime().NotNullable().WithDefault(SystemMethods.CurrentDateTime)
                 .WithColumn("UpdatedAt").AsDateTime().NotNullable().WithDefault(SystemMethods.CurrentDateTime);
 
-        }
+            Create.Table("PersonalProperties")
+                .WithColumn("Id").AsInt32().PrimaryKey().Identity()
+                .WithColumn("PropertyIndex").AsInt32()
+                .WithColumn("PropertyName").AsString()
+                .WithColumn("PropertyBanner").AsString()
+                .WithColumn("OwnerId").AsString();
+             
+
+    }
     }
 }

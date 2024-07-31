@@ -1,7 +1,9 @@
 ﻿using PersistentEmpires.Views.ViewsVM;
+using PersistentEmpiresLib;
 using PersistentEmpiresLib.Data;
 using PersistentEmpiresLib.Helpers;
 using PersistentEmpiresLib.NetworkMessages.Client;
+using PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors;
 using TaleWorlds.Engine.GauntletUI;
 using TaleWorlds.InputSystem;
 using TaleWorlds.Library;
@@ -50,23 +52,19 @@ namespace PersistentEmpires.Views.Views
         public override void OnMissionTick(float dt)
         {
             base.OnMissionTick(dt);
-
-
-            if (base.MissionScreen.InputManager.IsKeyReleased(InputKey.I))
-            {
-
-                if (this.IsActive)
-                {
+            if (base.MissionScreen.InputManager.IsKeyReleased(InputKey.I) || (this._gauntletLayer != null && this._gauntletLayer.Input.IsKeyReleased(InputKey.I)))
+            {  
+                if (this._gauntletLayer != null && this.IsActive)
+                { 
                     this.CloseInventory();
                 }
                 else
-                {
+                { 
                     this.RequestOpenInventory();
                 }
             }
             if (this._gauntletLayer != null && this.IsActive && (this._gauntletLayer.Input.IsHotKeyReleased("ToggleEscapeMenu") || this._gauntletLayer.Input.IsHotKeyReleased("Exit")))
-            {
-
+            { 
                 this.CloseInventory();
             }
         }

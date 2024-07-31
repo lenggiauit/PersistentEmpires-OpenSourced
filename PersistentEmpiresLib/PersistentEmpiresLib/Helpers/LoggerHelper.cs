@@ -64,6 +64,11 @@ namespace PersistentEmpiresLib.Helpers
         public static readonly string PlayerMountedHorse = "PlayerMountedHorse";
         public static readonly string PlayerDismountedHorse = "PlayerDismountedHorse";
         public static readonly string PlayerChangedName = "PlayerChangedName";
+        // Prison
+        public static readonly string PrisonerPlayer = "SetPrisonerPlayer";
+        public static readonly string PrisonerRelease = "PrisonerRelease";
+
+
     }
 
     public class LoggerHelper

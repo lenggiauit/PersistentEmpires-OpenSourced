@@ -36,7 +36,7 @@ namespace PersistentEmpiresLib.NetworkMessages.Server
         {
             // throw new NotImplementedException();
             bool result = true;
-            this.factionIndex = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(-1, 200, true), ref result);
+            this.factionIndex = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(-1, 300, true), ref result);
             BasicCultureObject bco = (BasicCultureObject)GameNetworkMessage.ReadObjectReferenceFromPacket(MBObjectManager.Instance, CompressionBasic.GUIDCompressionInfo, ref result);
             String name = GameNetworkMessage.ReadStringFromPacket(ref result);
             Team team = Mission.MissionNetworkHelper.GetTeamFromTeamIndex(GameNetworkMessage.ReadTeamIndexFromPacket(ref result));
@@ -54,7 +54,7 @@ namespace PersistentEmpiresLib.NetworkMessages.Server
 
         protected override void OnWrite()
         {
-            GameNetworkMessage.WriteIntToPacket(factionIndex, new CompressionInfo.Integer(-1, 200, true));
+            GameNetworkMessage.WriteIntToPacket(factionIndex, new CompressionInfo.Integer(-1, 300, true));
             GameNetworkMessage.WriteObjectReferenceToPacket(faction.basicCultureObject, CompressionBasic.GUIDCompressionInfo);
             GameNetworkMessage.WriteStringToPacket(faction.name);
             GameNetworkMessage.WriteTeamIndexToPacket(faction.team.TeamIndex);

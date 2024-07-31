@@ -1,6 +1,9 @@
-﻿using PersistentEmpiresLib.Database.DBEntities;
+﻿using Data;
+using Database.DBEntities;
+using PersistentEmpiresLib.Database.DBEntities;
 using PersistentEmpiresLib.Factions;
 using PersistentEmpiresLib.SceneScripts;
+using SceneScripts;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -93,6 +96,13 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
         public delegate DBCastle GetCastle(int factionIndex);
         public delegate DBCastle CreateOrSaveCastle(int castleIndex, int factionIndex);
 
+
+        /*PersonalProperties*/
+        public delegate IEnumerable<DBPersonalProperties> GetPersonalProperties();
+        public delegate DBPersonalProperties GetPersonalProperty(int ppIndex);
+        public delegate DBPersonalProperties CreateOrSavePersonalProperty(int propertyIndex, string propertyName, string banner);
+
+
         public static event IsPlayerWhitelisted OnIsPlayerWhitelisted;
 
         public static event CreatePlayerNameIfNotExists OnCreatePlayerNameIfNotExists;
@@ -118,6 +128,10 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
         public static event GetCastles OnGetCastles;
         public static event CreateOrSaveCastle OnCreateOrSaveCastle;
 
+        /* Personal Properties  */
+
+        public static event GetPersonalProperties OnGetPersonalProperty;
+        public static event CreateOrSavePersonalProperty OnCreateOrSavePersonalProperty;
 
         /* Upgradeable Buildings */
         public static event GetAllUpgradeableBuildings OnGetAllUpgradeableBuildings;
@@ -460,6 +474,34 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
                 }
             }
         }
+
+        public static IEnumerable<DBPersonalProperties> HandleGetPersonalProperties()
+        {
+            long rightNow = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            if (OnGetPersonalProperty != null)
+            {
+                var result = OnGetPersonalProperty();
+                LogQuery(String.Format("OnGetPersonalProperty Took {0} ms", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - rightNow));
+                return result;
+            }
+            return null;
+        }
+
+        public static DBPersonalProperties HandleCreateOrSavePersonalProperty(PersonalProperty pp)
+        {
+            Debug.Print("[Save System] Is OnCreateOrSavePersonalProperty null ? " + (OnCreateOrSavePersonalProperty== null).ToString());
+            long rightNow = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            if (OnCreateOrSavePersonalProperty != null)
+            {
+                var result = OnCreateOrSavePersonalProperty(pp.PropertyIndex, pp.PropertyName, pp.PropertyBanner.ToString());
+                LogQuery(String.Format("OnCreateOrSavePersonalProperty Took {0} ms", DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() - rightNow));
+                return result;
+            }
+            return null;
+        }
+
+
+
         private void HandleExceptionalExit(object sender, UnhandledExceptionEventArgs args)
         {
             Exception e = (Exception)args.ExceptionObject;
@@ -545,5 +587,8 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
                 this._currentAutoSaveJob.doWork();
             }
         }
+
+         
+
     }
 }

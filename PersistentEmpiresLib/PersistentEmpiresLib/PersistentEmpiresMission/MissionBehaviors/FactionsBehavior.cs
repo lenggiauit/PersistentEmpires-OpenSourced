@@ -113,8 +113,8 @@ namespace PersistentEmpiresLib.PersistentEmpiresMission.MissionBehaviors
                 BasicCultureObject outlawCulture = MBObjectManager.Instance.GetObject<BasicCultureObject>("empire");
 
                 Banner banner = new Banner(commonerCulture.BannerKey, commonerCulture.BackgroundColor1, commonerCulture.ForegroundColor1);
-                Banner banner2 = new Banner("11.116.116.1408.1101.764.764.1.0.0.309.40.116.735.435.764.764.1.0.0.309.40.116.735.435.764.764.1.1.0.347.40.116.250.250.764.524.1.0.0");
-               //Banner banner2 = new Banner("24.193.116.1536.1536.768.768.1.0.0");
+                //Banner banner2 = new Banner("11.116.116.1408.1101.764.764.1.0.0.309.40.116.735.435.764.764.1.0.0.309.40.116.735.435.764.764.1.1.0.347.40.116.250.250.764.524.1.0.0");
+                Banner banner2 = new Banner("24.193.116.1536.1536.768.768.1.0.0");
 
                 Faction commoners = new Faction(commonerCulture, banner, "Commoners");
                 Faction outlaws = new Faction(outlawCulture, banner2, ConfigManager.GetStrConfig("OutlawsFactionName",  "Outlaws"));

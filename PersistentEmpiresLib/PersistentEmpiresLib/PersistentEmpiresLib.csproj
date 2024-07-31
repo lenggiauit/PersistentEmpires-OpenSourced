@@ -135,6 +135,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Database\DBEntities\DBHouse.cs" />
+    <Compile Include="Database\DBEntities\DBPersonalProperties.cs" />
+    <Compile Include="Data\PersonalProperties.cs" />
     <Compile Include="Helpers\CountDownTimer.cs" />
     <Compile Include="Helpers\Utilities.cs" />
     <Compile Include="Main.cs" />
@@ -343,6 +346,7 @@
     <Compile Include="PersistentEmpiresMission\MissionBehaviors\PersistentEmpireBehavior.cs" />
     <Compile Include="PersistentEmpiresMission\MissionBehaviors\PersistentEmpireClientBehavior.cs" />
     <Compile Include="PersistentEmpiresMission\MissionBehaviors\PersistentEmpireSceneSyncBehaviors.cs" />
+    <Compile Include="PersistentEmpiresMission\MissionBehaviors\PersonalPropertyBehavior.cs" />
     <Compile Include="PersistentEmpiresMission\MissionBehaviors\PickpocketingBehavior.cs" />
     <Compile Include="PersistentEmpiresMission\MissionBehaviors\PlayerInventoryComponent.cs" />
     <Compile Include="PersistentEmpiresMission\MissionBehaviors\PoisoningBehavior.cs" />
@@ -397,6 +401,8 @@
     <Compile Include="SceneScripts\PE_Mangonel.cs" />
     <Compile Include="SceneScripts\PE_MoneyChest.cs" />
     <Compile Include="SceneScripts\PE_NativeGate.cs" />
+    <Compile Include="SceneScripts\PE_PersonalDoor.cs" />
+    <Compile Include="SceneScripts\PE_PersonalProperty.cs" />
     <Compile Include="SceneScripts\PE_ShipCannon.cs" />
     <Compile Include="SceneScripts\PE_SiegeTower.cs" />
     <Compile Include="SceneScripts\PE_SiegeTowerBuilder.cs" />
@@ -422,11 +428,8 @@
     <PackageReference Include="BouncyCastle">
       <Version>1.8.9</Version>
     </PackageReference>
-    <PackageReference Include="RestSharp.Newtonsoft.Json">
-      <Version>1.5.1</Version>
-    </PackageReference>
-    <PackageReference Include="Websocket.Client">
-      <Version>3.2.61</Version>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>13.0.3</Version>
     </PackageReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

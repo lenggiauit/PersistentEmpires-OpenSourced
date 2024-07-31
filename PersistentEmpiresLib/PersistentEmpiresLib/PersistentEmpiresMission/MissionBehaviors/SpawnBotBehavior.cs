@@ -49,18 +49,18 @@ namespace PersistentEmpiresMission.MissionBehaviors
         private int SpawnDuration = 40;
         private int IdleDuration = 10;
         Vec3 botInitialPosition = new Vec3(1374.61f, 1101.65f, 1.41434f);
+
+        private int BotCheckingDuration = 10;
+        private long WillBotCheckingAt = 0;
+
         List<string> botIndexs = new List<string>()
         {
             {"event_theoden" },
             {"event_rohan_officer" },
-            {"event_rohan_archer" }, 
+            {"event_rohan_skirmisher" }, 
             {"event_rohan_infantry" },
-            {"event_galadhrim_warrior" },
-            {"event_uruk_commander" },
-            {"event_uruk_berserker" },
-            {"event_uruk_crossbow" },
-            {"event_uruk_pikeman" },
-            {"event_uruk_infantry" }, 
+            {"event_galadhrim_warrior" }, 
+            {"event_uruk_commander" },  
             {"event_legolas"} 
         };
          
@@ -196,68 +196,81 @@ namespace PersistentEmpiresMission.MissionBehaviors
             }
         }
 
+        private void ResetBotCheckingDuration()
+        {
+            this.WillBotCheckingAt = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + this.BotCheckingDuration;
+        }
+        private bool IsBotCheckingAble()
+        {
+            return this.WillBotCheckingAt < DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        }
+
         public override void OnMissionTick(float dt)
         {
 
             try
-            {
-                base.OnMissionTick(dt); 
-
-                foreach (BotConfig botConfig in BotConfigList)
+            { 
+                if (IsBotCheckingAble())
                 {
-                    var botExist = this.botAgents.Where(b => b.Config.Id == botConfig.Id).FirstOrDefault();
-                    if (botExist == null)
+                    Debug.Print("IsBotCheckingAble");
+                    foreach (BotConfig botConfig in BotConfigList)
                     {
-                        if (!WillBeSpawnAts.ContainsKey(botConfig.Id))
+                        var botExist = this.botAgents.Where(b => b.Config.Id == botConfig.Id).FirstOrDefault();
+                        if (botExist == null)
                         {
-                            WillBeSpawnAts.Add(botConfig.Id, 0);
+                            if (!WillBeSpawnAts.ContainsKey(botConfig.Id))
+                            {
+                                WillBeSpawnAts.Add(botConfig.Id, 0);
+                            }
+
+                            if (WillBeSpawnAts[botConfig.Id] < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
+                            {
+                                WillBeSpawnAts[botConfig.Id] = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + SpawnDuration;
+                                WillBeIdleAts[botConfig.Id] = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + IdleDuration;
+                                MissionSpawnBot(botConfig);
+                                Debug.Print("Spawn Bot");
+                            }
                         }
 
-                        if (WillBeSpawnAts[botConfig.Id] < DateTimeOffset.UtcNow.ToUnixTimeSeconds())
-                        {
-                            WillBeSpawnAts[botConfig.Id] = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + SpawnDuration;
-                            WillBeIdleAts[botConfig.Id] = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + IdleDuration;
-                            MissionSpawnBot(botConfig);
-                            Debug.Print("Spawn Bot");
-                        }
                     }
 
-                }
 
-
-                foreach (var bot in botAgents)
-                {
-                    if (bot != null && !bot.Agent.IsPaused)
+                    foreach (var bot in botAgents)
                     {
-
-                        if (!bot.Agent.IsInBeingStruckAction)
+                        if (bot != null && !bot.Agent.IsPaused)
                         {
-                            // bot idle moving 
-                            BotIdleMoving( bot.Config.Id,bot.Agent);
-                        }
 
-                        foreach (Agent agent in Mission.Current.AllAgents.Where(a => a.IsPlayerControlled && a.IsHuman && a.IsPlayerUnit && a.IsActive() && a.Controller != ControllerType.AI).ToList())
-                        {
-                            if (bot.Agent.Position.Distance(agent.Position) < bot.Config.Range)
+                            if (!bot.Agent.IsInBeingStruckAction)
                             {
-                                if (bot.Agent.GetTargetAgent() == null)
-                                {
-                                    bot.Agent.SetTargetAgent(agent);
-                                    //Debug.Print("SetTargetAgent ------------------------------------- " + agent.Name);
-                                }
-                                if (bot.Agent.AIStateFlags != Agent.AIStateFlag.Alarmed)
-                                {
-                                     bot.Agent.AIStateFlags |= Agent.AIStateFlag.Alarmed; 
-                                }
+                                // bot idle moving 
+                                BotIdleMoving(bot.Config.Id, bot.Agent);
+                            }
 
-                                if (bot.Agent.HasMeleeWeaponCached && bot.Agent.Position.Distance(agent.Position) <  bot.Config.Range)
+                            foreach (Agent agent in Mission.Current.AllAgents.Where(a => a.IsPlayerControlled && a.IsHuman && a.IsPlayerUnit && a.IsActive() && a.Controller != ControllerType.AI).ToList())
+                            {
+                                if (bot.Agent.Position.Distance(agent.Position) < bot.Config.Range)
                                 {
-                                     bot.Agent.SetTargetPosition(new Vec2(agent.Position.AsVec2.x + 1, agent.Position.AsVec2.y + 1));
+                                    if (bot.Agent.GetTargetAgent() == null)
+                                    {
+                                        bot.Agent.SetTargetAgent(agent);
+                                        //Debug.Print("SetTargetAgent ------------------------------------- " + agent.Name);
+                                    }
+                                    if (bot.Agent.AIStateFlags != Agent.AIStateFlag.Alarmed)
+                                    {
+                                        bot.Agent.AIStateFlags |= Agent.AIStateFlag.Alarmed;
+                                    }
+
+                                    if (bot.Agent.HasMeleeWeaponCached && bot.Agent.Position.Distance(agent.Position) < bot.Config.Range)
+                                    {
+                                        bot.Agent.SetTargetPosition(new Vec2(agent.Position.AsVec2.x + 1, agent.Position.AsVec2.y + 1));
+                                    }
                                 }
                             }
                         }
-                    } 
-                }
+                    }
+                    ResetBotCheckingDuration();
+                } 
+
             }
             catch (Exception ex) { Debug.PrintError("Error: " + ex.Message); }
         }

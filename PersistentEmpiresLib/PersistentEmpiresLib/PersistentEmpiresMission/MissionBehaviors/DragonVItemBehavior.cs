@@ -38,6 +38,8 @@ namespace PersistentEmpiresMission.MissionBehaviors
     }
     public class DragonVItemBehavior : MissionNetwork
     {
+        private long WillAbleToUse = 0;
+        private int UseDurationSeconds = 10;
         private class UsingAction
         {
             public Agent PlayerAgent;
@@ -97,7 +99,15 @@ namespace PersistentEmpiresMission.MissionBehaviors
                 return;
             }
         }
-         
+
+        private void ResetUseAble()
+        {
+            this.WillAbleToUse = DateTimeOffset.UtcNow.ToUnixTimeSeconds() + this.UseDurationSeconds;
+        }
+        private bool IsUseAble()
+        {
+            return this.WillAbleToUse < DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        }
 
         public bool RequestStartUsing()
         {
@@ -119,11 +129,21 @@ namespace PersistentEmpiresMission.MissionBehaviors
             {
                 base.Mission.MakeSound(SoundEvent.GetEventIdFromString(item.UsingSound), myAgent.Position, false, true, -1, -1);
             }
-            GameNetwork.BeginModuleEventAsClient();
-            GameNetwork.WriteMessage(new RequestStartUsingDragonVItem());
-            GameNetwork.EndModuleEventAsClient();
-           // myAgent.SetActionChannel(0, item.Animation, true, 0UL, 0.0f, 1f, -0.2f, 0.4f, 0f, false, -0.2f, 0, true);
-            return true;
+
+            if (!IsUseAble())
+            {
+                InformationManager.DisplayMessage(new InformationMessage(string.Format("You need to wait {0} seconds to use this item", Math.Round((double)(this.WillAbleToUse - DateTimeOffset.UtcNow.ToUnixTimeSeconds()), 0)), Color.ConvertStringToColor("#d32f2fff")));
+                return false;
+            }
+            else
+            {  
+                GameNetwork.BeginModuleEventAsClient();
+                GameNetwork.WriteMessage(new RequestStartUsingDragonVItem());
+                GameNetwork.EndModuleEventAsClient();
+                ResetUseAble();
+                // myAgent.SetActionChannel(0, item.Animation, true, 0UL, 0.0f, 1f, -0.2f, 0.4f, 0f, false, -0.2f, 0, true);
+                return true;
+            }
         }
 
         public void RequestStopUsing()
@@ -184,7 +204,7 @@ namespace PersistentEmpiresMission.MissionBehaviors
         private void HandleAgentUsingDragonVItemFromServer(AgentUsingDragonVItem message)
         {
             if (message.PlayerAgent == null || message.PlayerAgent.IsActive() == false) return; 
-            //this.StopAgentUsing(message.PlayerAgent);
+            this.StopAgentUsing(message.PlayerAgent);
             if (this.DragonVItems.Count > message.UsingDragonVItemIndex)
             {
                 this.SpawnItem(message.PlayerAgent, this.DragonVItems[message.UsingDragonVItemIndex]);
@@ -217,7 +237,13 @@ namespace PersistentEmpiresMission.MissionBehaviors
             if (item.Item == null) return false;
 
             float waterLevelAdj = ConfigManager.GetFloatConfig("WaterLevelAdj", 0.2f);
-            if (peer.ControlledAgent.Position.Z >= Mission.Current.Scene.GetWaterLevel() - waterLevelAdj)
+            if (peer.ControlledAgent.Position.Z >= Mission.Current.Scene.GetWaterLevel() - waterLevelAdj
+                || peer.ControlledAgent.GetCurrentActionType(0) == Agent.ActionCodeType.Fall
+                || peer.ControlledAgent.GetCurrentActionType(0) == Agent.ActionCodeType.Jump
+                || peer.ControlledAgent.GetCurrentActionType(0) == Agent.ActionCodeType.JumpStart
+                || peer.ControlledAgent.GetCurrentActionType(0) == Agent.ActionCodeType.JumpAllBegin
+
+                )
             {
                 InformationComponent.Instance.SendMessage("Cannot use this item here, please use it in the water.", new Color(1f, 0, 0).ToUnsignedInteger(), peer);
                 return false;

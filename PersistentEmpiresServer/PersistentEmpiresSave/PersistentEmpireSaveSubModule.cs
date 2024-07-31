@@ -58,6 +58,7 @@ namespace PersistentEmpiresSave
             DBCastleRepository.Initialize();
             DBBankingRepository.Initialize();
             DBWhitelistRepository.Initialize();
+            DBPersonalPropertiesRepository.Initialize();
 
             Debug.Print("[Persistent Empires Save System] Initialization Done !");
         }

@@ -22,6 +22,10 @@ namespace PersistentEmpires.Views.Views.FactionManagement
                 (TabFactionVM faction) =>
                 {
                     this._factionsBehavior.RequestDeclareWar(this._factionsBehavior.Factions[faction.FactionIndex], faction.FactionIndex);
+                    if(discord != null && !DiscordNotWorks)
+                    {
+                         
+                    }
                     //Declare ware
                 },
                 (TabFactionVM faction) =>

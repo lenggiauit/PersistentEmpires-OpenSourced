@@ -30,8 +30,8 @@ namespace PersistentEmpiresLib.NetworkMessages.Server
         {
             bool result = true;
             this.CastleBanner = (PE_CastleBanner)Mission.MissionNetworkHelper.GetMissionObjectFromMissionObjectId(GameNetworkMessage.ReadMissionObjectIdFromPacket(ref result));
-            this.CastleBanner.CastleIndex = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(0, 200), ref result);
-            this.CastleBanner.FactionIndex = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(-1, 200), ref result);
+            this.CastleBanner.CastleIndex = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(0, 300), ref result);
+            this.CastleBanner.FactionIndex = GameNetworkMessage.ReadIntFromPacket(new CompressionInfo.Integer(-1, 300), ref result);
 
             return result;
         }
@@ -39,8 +39,8 @@ namespace PersistentEmpiresLib.NetworkMessages.Server
         protected override void OnWrite()
         {
             GameNetworkMessage.WriteMissionObjectIdToPacket(this.CastleBanner.Id);
-            GameNetworkMessage.WriteIntToPacket(this.CastleBanner.CastleIndex, new CompressionInfo.Integer(0, 200));
-            GameNetworkMessage.WriteIntToPacket(this.CastleBanner.FactionIndex, new CompressionInfo.Integer(-1, 200));
+            GameNetworkMessage.WriteIntToPacket(this.CastleBanner.CastleIndex, new CompressionInfo.Integer(0, 300));
+            GameNetworkMessage.WriteIntToPacket(this.CastleBanner.FactionIndex, new CompressionInfo.Integer(-1, 300));
         }
     }
 }
